@@ -1,4 +1,5 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain, net } from 'electron';
+import express from 'express';
 import path from 'path';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -58,3 +59,77 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+let server: any;
+
+ipcMain.handle('start-server', () => {
+	console.log('inside start-server');
+	if (!server) {
+		const app = express();
+		app.get('/', (req, res) => {
+			res.send('Hello World!');
+		});
+
+		server = app.listen(3001, () => {
+			console.log(`Server running at http://localhost:3001/`);
+		});
+	}
+
+	return 'Server started';
+});
+
+function scanPort(port: string) {
+	return new Promise((resolve, reject) => {
+		const request = net.request(`http://localhost:${port}`);
+		request.on('response', (response) => {
+			// If the request was successful, the port is open
+			console.log('the port is open');
+			console.log(response);
+			console.log(response.headers);
+			console.log(response.rawHeaders);
+
+			resolve(true);
+		});
+		request.on('error', (error) => {
+			// If the request failed, the port is closed
+			console.log('the port is closed');
+			resolve(false);
+		});
+		request.end();
+	});
+}
+
+// async function scanPorts(startPort, endPort) {
+//   const openPorts = []
+//   for (let port = startPort; port <= endPort; port++) {
+//     const isOpen = await scanPort(port)
+//     if (isOpen) {
+//       openPorts.push(port)
+//     }
+//   }
+//   return openPorts
+// }
+
+// scanPorts(8000, 9000).then(openPorts => {
+//   console.log('Open ports:', openPorts)
+// })
+
+ipcMain.handle('stop-server', () => {
+	if (server) {
+		server.close(() => {
+			console.log('Server stopped');
+		});
+		server = null;
+	}
+
+	return 'Server stopped';
+});
+
+ipcMain.handle('scan-port', async () => {
+	return await scanPort('3000');
+});
+
+// const kill = require('kill-port')
+
+// kill(port, 'tcp')
+//   .then(console.log)
+//   .catch(console.log)
