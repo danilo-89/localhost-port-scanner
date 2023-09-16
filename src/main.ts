@@ -125,7 +125,7 @@ ipcMain.handle('stop-server', () => {
 });
 
 ipcMain.handle('scan-port', async () => {
-	return await scanPort('3000');
+	return await scanPort('3001');
 });
 
 // const kill = require('kill-port')
