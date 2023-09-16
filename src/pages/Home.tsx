@@ -1,5 +1,4 @@
-import React from 'react';
-import ActivePortsWrapper from '../components/ActivePortsWrapper';
+import ActivePortsWrapper from '@/components/ActivePortsWrapper';
 
 const Home = () => {
 	return (
