@@ -1,9 +1,13 @@
 import React from 'react';
+import ActivePortsWrapper from '../components/ActivePortsWrapper';
 
 const Home = () => {
 	return (
 		<div>
 			Home
+			<div>
+				<ActivePortsWrapper />
+			</div>
 			<div>
 				<button
 					type='button'
