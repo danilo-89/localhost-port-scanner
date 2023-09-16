@@ -7,9 +7,11 @@ if (require('electron-squirrel-startup')) {
 	app.quit();
 }
 
+let mainWindow;
+
 const createWindow = () => {
 	// Create the browser window.
-	const mainWindow = new BrowserWindow({
+	mainWindow = new BrowserWindow({
 		width: 800,
 		height: 600,
 		webPreferences: {
@@ -77,7 +79,7 @@ ipcMain.handle('start-server', () => {
 	return 'Server started';
 });
 
-function scanPort(port: string) {
+function scanPort(port: number) {
 	return new Promise((resolve, reject) => {
 		const request = net.request(`http://localhost:${port}`);
 		request.on('response', (response) => {
@@ -87,7 +89,7 @@ function scanPort(port: string) {
 			console.log(response.headers);
 			console.log(response.rawHeaders);
 
-			resolve(true);
+			resolve(response);
 		});
 		request.on('error', (error) => {
 			// If the request failed, the port is closed
@@ -98,20 +100,37 @@ function scanPort(port: string) {
 	});
 }
 
-// async function scanPorts(startPort, endPort) {
-//   const openPorts = []
-//   for (let port = startPort; port <= endPort; port++) {
-//     const isOpen = await scanPort(port)
-//     if (isOpen) {
-//       openPorts.push(port)
-//     }
-//   }
-//   return openPorts
-// }
+async function scanPorts(startPort: number, endPort: number) {
+	const openPorts = [];
+	const totalPorts = endPort - startPort + 1;
 
-// scanPorts(8000, 9000).then(openPorts => {
-//   console.log('Open ports:', openPorts)
-// })
+	for (let port = startPort; port <= endPort; port++) {
+		const response = await scanPort(port);
+		if (response) {
+			openPorts.push({
+				port,
+				statusCode: response?.statusCode,
+				statusMessage: response?.statusMessage,
+				headers: response?.headers,
+			});
+		}
+
+		// Calculate and call the progress callback
+		const percentComplete = ((port - startPort + 1) / totalPorts) * 100;
+		console.log({ percentComplete });
+		mainWindow?.webContents.send('scan-ports-progress', percentComplete);
+	}
+	console.log({ openPorts });
+	return openPorts;
+}
+
+// scanPorts(8000, 9000).then((openPorts) => {
+// 	console.log('Open ports:', openPorts);
+// });
+
+ipcMain.handle('scan-ports-progress', (event, percentComplete) => {
+	return percentComplete;
+});
 
 ipcMain.handle('stop-server', () => {
 	if (server) {
@@ -125,7 +144,11 @@ ipcMain.handle('stop-server', () => {
 });
 
 ipcMain.handle('scan-port', async () => {
-	return await scanPort('3001');
+	return await scanPort(3001);
+});
+
+ipcMain.handle('scan-ports', async (event) => {
+	return await scanPorts(3000, 7010);
 });
 
 // const kill = require('kill-port')

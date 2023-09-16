@@ -13,4 +13,23 @@ contextBridge.exposeInMainWorld('electronAPI', {
 	scanPort: () => {
 		ipcRenderer.invoke('scan-port');
 	},
+	scanPorts: async () => {
+		return ipcRenderer.invoke('scan-ports');
+	},
+
+	initPercent: (setState) => {
+		console.log('inside initPercent');
+		const stateUpdateHandler = (event, newState) => {
+			console.log({ receivedState: newState });
+			setState(newState);
+		};
+
+		ipcRenderer.on('scan-ports-progress', stateUpdateHandler);
+
+		// Return a cleanup function to remove the event listener
+		return () => {
+			console.log('scan-ports-progress listener cleanup');
+			ipcRenderer.removeListener('scan-ports-progress', stateUpdateHandler);
+		};
+	},
 });
