@@ -10,34 +10,32 @@ const reducer = (currentState: any, action: any) => {
 
 const useScanPorts = () => {
 	const [state, dispatch] = useReducer(reducer, {
-		state: null,
+		data: null,
 		isLoading: false,
-		percent: 0,
+		percentOfScanning: undefined,
 		error: null,
 	});
 
 	useEffect(() => {
 		// Init state listening and get the cleanup function
 		const cleanup = window.electronAPI.initPercent(dispatch);
-
 		console.log('inside listener uef');
-
 		// Call the cleanup function on component unmount
 		return cleanup;
 	}, []);
 
 	const scanPorts = async (portsForScaning: (number | number[])[]) => {
 		dispatch({
-			state: null,
+			data: null,
 			isLoading: true,
 			error: null,
-			percent: 0,
+			percentOfScanning: 0,
 		});
 		try {
 			const response = await window.electronAPI.scanPorts(portsForScaning);
 			console.log(response);
 			dispatch({
-				state: response,
+				data: response,
 			});
 		} catch (error: unknown) {
 			console.log(error);
