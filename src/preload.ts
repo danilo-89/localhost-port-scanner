@@ -21,7 +21,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 		console.log('inside initPercent');
 		const stateUpdateHandler = (event, newState) => {
 			console.log({ receivedState: newState });
-			setState({ percent: newState });
+			setState({ percentOfScanning: newState });
 		};
 
 		ipcRenderer.on('scan-ports-progress', stateUpdateHandler);
