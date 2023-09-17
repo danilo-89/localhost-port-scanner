@@ -14,7 +14,7 @@ const PortsToScan = () => {
 	const [inputRight, setInputRight] = useState(undefined);
 	const [inputSingle, setInputSingle] = useState(undefined);
 	// const [percent, setPercent] = useState(0);
-	const { state: scanningState, scanPorts } = useScanPorts();
+	const { state: scanningResult, scanPorts } = useScanPorts();
 
 	console.log(state);
 
@@ -32,7 +32,7 @@ const PortsToScan = () => {
 	// 	}
 	// };
 
-	console.log({ scanningState });
+	console.log({ scanningResult });
 
 	return (
 		<div>
@@ -72,12 +72,13 @@ const PortsToScan = () => {
 			</button>
 
 			<div>
-				<div>isLoading: {scanningState.isLoading ? 'true' : 'false'}</div>
-				<div>percent: {scanningState.percent}</div>
+				<div>isLoading: {scanningResult.isLoading ? 'true' : 'false'}</div>
+				<div>percent: {scanningResult.percentOfScanning}</div>
 			</div>
 			<div>
 				<button
 					type='button'
+					disabled={scanningResult.isLoading}
 					onClick={() => {
 						scanPorts(state);
 					}}
