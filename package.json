@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.0.4",
+    "@tanstack/match-sorter-utils": "^8.8.4",
     "@tanstack/react-table": "^8.10.0",
     "@vitejs/plugin-react": "^4.0.4",
     "electron-squirrel-startup": "^1.0.0",
