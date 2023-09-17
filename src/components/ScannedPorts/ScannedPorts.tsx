@@ -1,10 +1,29 @@
+import { useEffect, useMemo, useState } from 'react';
 import {
 	flexRender,
 	getCoreRowModel,
+	getFilteredRowModel,
 	getSortedRowModel,
 	useReactTable,
 } from '@tanstack/react-table';
-import { useMemo, useState } from 'react';
+import {
+	RankingInfo,
+	rankItem,
+	compareItems,
+} from '@tanstack/match-sorter-utils';
+
+const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+	// Rank the item
+	const itemRank = rankItem(row.getValue(columnId), value);
+
+	// Store the itemRank info
+	addMeta({
+		itemRank,
+	});
+
+	// Return if the item should be filtered in/out
+	return itemRank.passed;
+};
 
 const data = [
 	{
@@ -39,6 +58,7 @@ const data = [
 
 const ScannedPorts = () => {
 	const [sorting, setSorting] = useState<any>([]);
+	const [globalFilter, setGlobalFilter] = useState('');
 
 	const columns = useMemo<any>(
 		() => [
@@ -75,16 +95,27 @@ const ScannedPorts = () => {
 		columns,
 		state: {
 			sorting,
+			globalFilter,
 		},
+		onGlobalFilterChange: setGlobalFilter,
+		globalFilterFn: fuzzyFilter,
 		onSortingChange: setSorting,
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
+		getFilteredRowModel: getFilteredRowModel(),
 		debugTable: true,
 	});
 
 	return (
 		<div>
-			{' '}
+			<div>
+				<DebouncedInput
+					value={globalFilter ?? ''}
+					onChange={(value) => setGlobalFilter(String(value))}
+					className='p-2 font-lg shadow border border-block'
+					placeholder='Search all columns...'
+				/>
+			</div>{' '}
 			<div>
 				<div className='h-2' />
 				<table>
@@ -166,5 +197,39 @@ const ScannedPorts = () => {
 		</div>
 	);
 };
+
+// A debounced input react component
+function DebouncedInput({
+	value: initialValue,
+	onChange,
+	debounce = 500,
+	...props
+}: {
+	value: string | number;
+	onChange: (value: string | number) => void;
+	debounce?: number;
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>) {
+	const [value, setValue] = useState(initialValue);
+
+	useEffect(() => {
+		setValue(initialValue);
+	}, [initialValue]);
+
+	useEffect(() => {
+		const timeout = setTimeout(() => {
+			onChange(value);
+		}, debounce);
+
+		return () => clearTimeout(timeout);
+	}, [value]);
+
+	return (
+		<input
+			{...props}
+			value={value}
+			onChange={(e) => setValue(e.target.value)}
+		/>
+	);
+}
 
 export default ScannedPorts;
