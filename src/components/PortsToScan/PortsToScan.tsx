@@ -1,3 +1,4 @@
+import useScanPorts from '@/hooks/useScanPorts';
 import range from 'lodash.range';
 import { useEffect, useReducer, useState } from 'react';
 
@@ -12,7 +13,8 @@ const PortsToScan = () => {
 	const [inputLeft, setInputLeft] = useState(undefined);
 	const [inputRight, setInputRight] = useState(undefined);
 	const [inputSingle, setInputSingle] = useState(undefined);
-	const [percent, setPercent] = useState(0);
+	// const [percent, setPercent] = useState(0);
+	const { state: scanningState, scanPorts } = useScanPorts();
 
 	console.log(state);
 
@@ -21,22 +23,16 @@ const PortsToScan = () => {
 		dispatch(inputSingle);
 	};
 
-	const scanPorts = async () => {
-		try {
-			const response = await window.electronAPI.scanPorts(state);
-			console.log(response);
-		} catch (error: unknown) {
-			console.log(error);
-		}
-	};
+	// const scanPorts = async () => {
+	// 	try {
+	// 		const response = await window.electronAPI.scanPorts(state);
+	// 		console.log(response);
+	// 	} catch (error: unknown) {
+	// 		console.log(error);
+	// 	}
+	// };
 
-	useEffect(() => {
-		// Init state listening and get the cleanup function
-		const cleanup = window.electronAPI.initPercent(setPercent);
-
-		// Call the cleanup function on component unmount
-		return cleanup;
-	}, []);
+	console.log({ scanningState });
 
 	return (
 		<div>
@@ -76,13 +72,14 @@ const PortsToScan = () => {
 			</button>
 
 			<div>
-				<span>{percent}</span>
+				<div>isLoading: {scanningState.isLoading ? 'true' : 'false'}</div>
+				<div>percent: {scanningState.percent}</div>
 			</div>
 			<div>
 				<button
 					type='button'
 					onClick={() => {
-						scanPorts();
+						scanPorts(state);
 					}}
 				>
 					Scan Ports
