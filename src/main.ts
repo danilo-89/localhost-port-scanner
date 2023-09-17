@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain, net } from 'electron';
 import express from 'express';
+import range from 'lodash.range';
 import path from 'path';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -84,7 +85,7 @@ function scanPort(port: number) {
 		const request = net.request(`http://localhost:${port}`);
 		request.on('response', (response) => {
 			// If the request was successful, the port is open
-			console.log('the port is open');
+			console.log(port, 'the port is open');
 			console.log(response);
 			console.log(response.headers);
 			console.log(response.rawHeaders);
@@ -93,18 +94,66 @@ function scanPort(port: number) {
 		});
 		request.on('error', (error) => {
 			// If the request failed, the port is closed
-			console.log('the port is closed');
+			console.log(port, 'the port is closed');
 			resolve(false);
 		});
 		request.end();
 	});
 }
 
-async function scanPorts(startPort: number, endPort: number) {
-	const openPorts = [];
-	const totalPorts = endPort - startPort + 1;
+let portsAreScanning = false;
 
-	for (let port = startPort; port <= endPort; port++) {
+async function scanPorts(portsToScan: number[]) {
+	const openPorts = [];
+	const totalPorts = portsToScan.length;
+	// const totalPorts = endPort - startPort + 1;
+
+	// console.log(totalPorts);
+	// return;
+
+	if (portsAreScanning) {
+		console.log('Ports are already scanning!');
+		throw new Error('Ports are already scanning!');
+	}
+
+	portsAreScanning = true;
+
+	// [3000, 3001].forEach((port) => {
+	// 	const response = await scanPort(port);
+	// 	if (response) {
+	// 		openPorts.push({
+	// 			port,
+	// 			statusCode: response?.statusCode,
+	// 			statusMessage: response?.statusMessage,
+	// 			headers: response?.headers,
+	// 		});
+	// 	}
+
+	// 	// Calculate and call the progress callback
+	// 	const percentComplete = ((port - startPort + 1) / totalPorts) * 100;
+	// 	// console.log({ percentComplete });
+	// 	mainWindow?.webContents.send('scan-ports-progress', percentComplete);
+	// });
+	// for (let port = startPort; port <= endPort; port++) {
+	// 	const response = await scanPort(port);
+	// 	if (response) {
+	// 		openPorts.push({
+	// 			port,
+	// 			statusCode: response?.statusCode,
+	// 			statusMessage: response?.statusMessage,
+	// 			headers: response?.headers,
+	// 		});
+	// 	}
+
+	// 	// Calculate
+	// 	const percentComplete = ((port - startPort + 1) / totalPorts) * 100;
+	// 	// console.log({ percentComplete });
+	// 	mainWindow?.webContents.send('scan-ports-progress', percentComplete);
+	// }
+	let index = 0;
+
+	for (const port of portsToScan) {
+		index++;
 		const response = await scanPort(port);
 		if (response) {
 			openPorts.push({
@@ -116,17 +165,26 @@ async function scanPorts(startPort: number, endPort: number) {
 		}
 
 		// Calculate and call the progress callback
-		const percentComplete = ((port - startPort + 1) / totalPorts) * 100;
-		console.log({ percentComplete });
+		const percentComplete = (index / totalPorts) * 100;
+		console.log({ index }, { totalPorts });
 		mainWindow?.webContents.send('scan-ports-progress', percentComplete);
 	}
+
+	console.log({ portsToScan });
 	console.log({ openPorts });
+	portsAreScanning = false;
 	return openPorts;
 }
 
 // scanPorts(8000, 9000).then((openPorts) => {
 // 	console.log('Open ports:', openPorts);
 // });
+
+// 404 error when getting port
+// This can happen for a number of reasons, such as:
+
+// The path you're trying to reach doesn't exist on the server. The server is running, but there's no content at the specific path you're requesting. This can be the case if there's a typo in your path, or if you're requesting a path that hasn't been defined in your server's routing rules stackoverflow.com.
+// The server is not setup to respond to the type of request you're making. For example, you might be making a GET request to a path that only responds to POST requests.
 
 ipcMain.handle('scan-ports-progress', (event, percentComplete) => {
 	return percentComplete;
@@ -147,8 +205,24 @@ ipcMain.handle('scan-port', async () => {
 	return await scanPort(3001);
 });
 
-ipcMain.handle('scan-ports', async (event) => {
-	return await scanPorts(3000, 7010);
+const parsePortsForScaning = (portsArray: (number | number[])[]) => {
+	return [].concat(
+		...portsArray.map((item) => {
+			if (
+				Array.isArray(item) &&
+				item.length === 2 &&
+				typeof item[0] === 'number' &&
+				typeof item[1] === 'number'
+			) {
+				return range(item[0], item[1]);
+			}
+			return item;
+		})
+	);
+};
+
+ipcMain.handle('scan-ports', async (event, portsArray) => {
+	return await scanPorts(parsePortsForScaning(portsArray));
 });
 
 // const kill = require('kill-port')

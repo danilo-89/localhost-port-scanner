@@ -13,8 +13,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 	scanPort: () => {
 		ipcRenderer.invoke('scan-port');
 	},
-	scanPorts: async () => {
-		return ipcRenderer.invoke('scan-ports');
+	scanPorts: async (portsArray: (number | number[])[]) => {
+		return ipcRenderer.invoke('scan-ports', portsArray);
 	},
 
 	initPercent: (setState) => {
