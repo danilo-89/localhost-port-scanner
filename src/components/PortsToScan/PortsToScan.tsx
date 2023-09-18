@@ -1,20 +1,19 @@
-import useScanPorts from '@/hooks/useScanPorts';
+import { usePortsForScanningContext } from '@/context/PortsForScanningContext';
+import { useScannedPortsContext } from '@/context/ScannedPortsContext';
+
 import range from 'lodash.range';
 import { useEffect, useReducer, useState } from 'react';
 
 // sortedUniqBy
 
-const reducer = (state: any[], action: number | any[]) => {
-	return [...state, action];
-};
-
 const PortsToScan = () => {
-	const [state, dispatch] = useReducer(reducer, [3000, 3001, 5173]);
+	// const [state, dispatch] = useReducer(reducer, [[3000, 9001], 2000]);
+	const { state, dispatch } = usePortsForScanningContext();
 	const [inputLeft, setInputLeft] = useState(undefined);
 	const [inputRight, setInputRight] = useState(undefined);
 	const [inputSingle, setInputSingle] = useState(undefined);
 	// const [percent, setPercent] = useState(0);
-	const { state: scanningResult, scanPorts } = useScanPorts();
+	const { state: scanningResult, scanPorts } = useScannedPortsContext();
 
 	console.log(state);
 
@@ -84,6 +83,15 @@ const PortsToScan = () => {
 					}}
 				>
 					Scan Ports
+				</button>
+				<button
+					type='button'
+					// disabled={scanningResult.isLoading}
+					onClick={() => {
+						window.electronAPI.stopScanning();
+					}}
+				>
+					Stop Scanning
 				</button>
 			</div>
 		</div>
