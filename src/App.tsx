@@ -1,9 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import Home from './pages/Home';
 
+// Contexts
+import { PortsForScanningProvider } from './context/PortsForScanningContext';
+import { ScannedPortsProvider } from './context/ScannedPortsContext';
+
+// Pages
+import Home from './pages/Home';
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 	<React.StrictMode>
-		<Home />
+		<PortsForScanningProvider>
+			<ScannedPortsProvider>
+				<Home />
+			</ScannedPortsProvider>
+		</PortsForScanningProvider>
 	</React.StrictMode>
 );
