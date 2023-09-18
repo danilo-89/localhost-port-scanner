@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { HTMLProps, useEffect, useMemo, useRef, useState } from 'react';
 import {
 	flexRender,
 	getCoreRowModel,
@@ -11,6 +11,8 @@ import {
 	rankItem,
 	compareItems,
 } from '@tanstack/match-sorter-utils';
+import { usePortsForScanningContext } from '@/context/PortsForScanningContext';
+import { useScannedPortsContext } from '@/context/ScannedPortsContext';
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 	// Rank the item
@@ -25,7 +27,9 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 	return itemRank.passed;
 };
 
-const data = [
+const emptyArray = [];
+
+const dataMockup = [
 	{
 		port: 3000,
 		statusCode: 200,
@@ -57,14 +61,48 @@ const data = [
 ];
 
 const ScannedPorts = () => {
+	const { state } = useScannedPortsContext();
 	const [sorting, setSorting] = useState<any>([]);
 	const [globalFilter, setGlobalFilter] = useState('');
+	const [rowSelection, setRowSelection] = useState({});
+
+	console.log('state', state.data);
 
 	const columns = useMemo<any>(
 		() => [
 			{
+				id: 'select',
+				header: ({ table }) => (
+					<IndeterminateCheckbox
+						{...{
+							checked: table.getIsAllRowsSelected(),
+							indeterminate: table.getIsSomeRowsSelected(),
+							onChange: table.getToggleAllRowsSelectedHandler(),
+						}}
+					/>
+				),
+				cell: ({ row }) => (
+					<div className='px-1'>
+						<IndeterminateCheckbox
+							{...{
+								checked: row.getIsSelected(),
+								disabled: !row.getCanSelect(),
+								indeterminate: row.getIsSomeSelected(),
+								onChange: row.getToggleSelectedHandler(),
+							}}
+						/>
+					</div>
+				),
+			},
+			{
 				accessorKey: 'port',
 				header: 'Port',
+				cell: (info) => info.getValue(),
+				footer: (props) => props.column.id,
+			},
+			{
+				accessorKey: 'statusMessage',
+				header: 'Status',
 				cell: (info) => info.getValue(),
 				footer: (props) => props.column.id,
 			},
@@ -91,12 +129,17 @@ const ScannedPorts = () => {
 	);
 
 	const table = useReactTable({
-		data,
+		// initialState: [],
+		data: state.data || emptyArray,
+		// data: state?.data || [],
 		columns,
 		state: {
 			sorting,
 			globalFilter,
+			rowSelection,
 		},
+		enableRowSelection: true,
+		onRowSelectionChange: setRowSelection,
 		onGlobalFilterChange: setGlobalFilter,
 		globalFilterFn: fuzzyFilter,
 		onSortingChange: setSorting,
@@ -157,10 +200,14 @@ const ScannedPorts = () => {
 					<tbody>
 						{table
 							.getRowModel()
-							.rows.slice(0, 10)
+							.rows // .slice(0, 10)
 							.map((row) => {
 								return (
-									<tr key={row.id}>
+									<tr
+										key={row.id}
+										className='even:bg-yankeesBlue odd:bg-charcoal'
+										// className='border-y-[1rem] border-[transparent]'
+									>
 										{/* <td>
 											<input type='checkbox' name='' id='' />
 										</td> */}
@@ -168,7 +215,7 @@ const ScannedPorts = () => {
 											return (
 												<td
 													key={cell.id}
-													className='pr-5'
+													className="pr-5 [&:empty::after]:content-['-'] [&:nth-of-type(2)]:py-4"
 													onClick={() => console.log(row)}
 												>
 													{flexRender(
@@ -184,7 +231,7 @@ const ScannedPorts = () => {
 					</tbody>
 				</table>
 				<hr />
-				{/* <div>{table.getRowModel().rows.length} Rows</div> */}
+				<div>{table.getRowModel().rows.length} Rows</div>
 				{/* <div>
     <button onClick={() => rerender()}>Force Rerender</button>
   </div>
@@ -228,6 +275,29 @@ function DebouncedInput({
 			{...props}
 			value={value}
 			onChange={(e) => setValue(e.target.value)}
+		/>
+	);
+}
+
+function IndeterminateCheckbox({
+	indeterminate,
+	className = '',
+	...rest
+}: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>) {
+	const ref = useRef<HTMLInputElement>(null!);
+
+	useEffect(() => {
+		if (typeof indeterminate === 'boolean') {
+			ref.current.indeterminate = !rest.checked && indeterminate;
+		}
+	}, [ref, indeterminate]);
+
+	return (
+		<input
+			type='checkbox'
+			ref={ref}
+			className={className + ' cursor-pointer'}
+			{...rest}
 		/>
 	);
 }
