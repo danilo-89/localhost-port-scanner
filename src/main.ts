@@ -3,6 +3,21 @@ import express from 'express';
 import range from 'lodash.range';
 import path from 'path';
 
+// Error: net::ERR_CONNECTION_REFUSED
+// ERR_ADDRESS_INVALID - port 0
+// ERR_UNSAFE_PORT - port 1
+
+const parseError = (errorValue: string) => {
+	switch (errorValue) {
+		case 'net::ERR_ADDRESS_INVALID':
+			return 'Address Invalid';
+		case 'net::ERR_UNSAFE_PORT':
+			return 'Unsafe Port';
+		default:
+			return errorValue;
+	}
+};
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
 	app.quit();
@@ -94,14 +109,27 @@ function scanPort(port: number) {
 		});
 		request.on('error', (error) => {
 			// If the request failed, the port is closed
+			console.log(error);
+			console.log(error.message);
+			console.log(error.name);
 			console.log(port, 'the port is closed');
-			resolve(false);
+			if (error.message === 'net::ERR_CONNECTION_REFUSED') {
+				resolve(false);
+			} else {
+				resolve({
+					port: port,
+					statusMessage: parseError(error.message),
+					statusCode: undefined,
+					headers: {},
+				});
+			}
 		});
 		request.end();
 	});
 }
 
 let portsAreScanning = false;
+let shouldContinueScanning = true;
 
 async function scanPorts(portsToScan: number[]) {
 	const openPorts = [];
@@ -117,6 +145,7 @@ async function scanPorts(portsToScan: number[]) {
 	}
 
 	portsAreScanning = true;
+	shouldContinueScanning = true;
 
 	// [3000, 3001].forEach((port) => {
 	// 	const response = await scanPort(port);
@@ -154,6 +183,13 @@ async function scanPorts(portsToScan: number[]) {
 
 	for (const port of portsToScan) {
 		index++;
+
+		// Check if the flag is set to false, and if so, stop scanning
+		if (!shouldContinueScanning) {
+			console.log('Scanning stopped.');
+			break;
+		}
+
 		const response = await scanPort(port);
 		if (response) {
 			openPorts.push({
@@ -186,6 +222,10 @@ async function scanPorts(portsToScan: number[]) {
 // The path you're trying to reach doesn't exist on the server. The server is running, but there's no content at the specific path you're requesting. This can be the case if there's a typo in your path, or if you're requesting a path that hasn't been defined in your server's routing rules stackoverflow.com.
 // The server is not setup to respond to the type of request you're making. For example, you might be making a GET request to a path that only responds to POST requests.
 
+// port ranges: 0 - 1_024 - 65_536
+// The range 0-1023 is reserved by TCP/IP for the "well-known ports", the ones commonly used by system and network services
+// https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
+
 ipcMain.handle('scan-ports-progress', (event, percentComplete) => {
 	return percentComplete;
 });
@@ -202,7 +242,10 @@ ipcMain.handle('stop-server', () => {
 });
 
 ipcMain.handle('scan-port', async () => {
-	return await scanPort(3001);
+	// Error: net::ERR_CONNECTION_REFUSED
+	// ERR_ADDRESS_INVALID - port 0
+	// ERR_UNSAFE_PORT - port 1
+	return await scanPort(11);
 });
 
 const parsePortsForScaning = (portsArray: (number | number[])[]) => {
@@ -223,6 +266,11 @@ const parsePortsForScaning = (portsArray: (number | number[])[]) => {
 
 ipcMain.handle('scan-ports', async (event, portsArray) => {
 	return await scanPorts(parsePortsForScaning(portsArray));
+});
+
+ipcMain.handle('stop-scanning', () => {
+	shouldContinueScanning = false;
+	return 'Scanning will stop.';
 });
 
 // const kill = require('kill-port')
