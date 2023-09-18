@@ -32,4 +32,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 			ipcRenderer.removeListener('scan-ports-progress', stateUpdateHandler);
 		};
 	},
+	stopScanning: () => {
+		ipcRenderer.invoke('stop-scanning');
+	},
 });
