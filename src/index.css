@@ -9,3 +9,9 @@ body {
 	/* max-width: 38rem; */
 	padding: 2rem;
 }
+
+@layer base {
+	input {
+		@apply text-darkGunmetal;
+	}
+}
