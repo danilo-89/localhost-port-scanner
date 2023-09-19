@@ -35,4 +35,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 	stopScanning: () => {
 		ipcRenderer.invoke('stop-scanning');
 	},
+
+	getIP: async () => {
+		return await ipcRenderer.invoke('get-ip');
+	},
 });
