@@ -19,37 +19,40 @@ const Home = () => {
 
 	return (
 		<>
-			<div>
-				<InfoSection />
-				<Controls />
-				<ScannedPorts />
+			<div className='max-w-[940px] min-w-[640px] mx-auto'>
+				<div>
+					<InfoSection />
+					<Controls />
+					<ScannedPorts />
+				</div>
+				<div>
+					<button
+						type='button'
+						onClick={() => {
+							window.electronAPI.startServer();
+						}}
+					>
+						Start Server
+					</button>
+					<button
+						type='button'
+						onClick={() => {
+							window.electronAPI.stopServer();
+						}}
+					>
+						Stop Server
+					</button>
+					<button
+						type='button'
+						onClick={() => {
+							window.electronAPI.scanPort();
+						}}
+					>
+						Scan Port
+					</button>
+				</div>
 			</div>
-			<div>
-				<button
-					type='button'
-					onClick={() => {
-						window.electronAPI.startServer();
-					}}
-				>
-					Start Server
-				</button>
-				<button
-					type='button'
-					onClick={() => {
-						window.electronAPI.stopServer();
-					}}
-				>
-					Stop Server
-				</button>
-				<button
-					type='button'
-					onClick={() => {
-						window.electronAPI.scanPort();
-					}}
-				>
-					Scan Port
-				</button>
-			</div>
+
 			<Footer />
 		</>
 	);
