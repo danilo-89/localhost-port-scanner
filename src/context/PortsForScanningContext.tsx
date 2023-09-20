@@ -5,8 +5,11 @@ const PortsForScanningContext = createContext<any>({
 	dispatch: () => null,
 });
 
-const reducer = (state: any[], action: number | any[]) => {
-	return [...state, action];
+const reducer = (state: any[], action: number | [number, number]) => {
+	if (action !== undefined) {
+		return [...state, action];
+	}
+	return state;
 };
 
 export function PortsForScanningProvider({
@@ -14,7 +17,11 @@ export function PortsForScanningProvider({
 }: {
 	children: ReactNode;
 }) {
-	const [state, dispatch] = useReducer(reducer, [[0, 6001], 2000]);
+	const [state, dispatch] = useReducer(reducer, [
+		[0, 6001],
+		9999999999999,
+		7000,
+	]);
 
 	return (
 		<PortsForScanningContext.Provider
