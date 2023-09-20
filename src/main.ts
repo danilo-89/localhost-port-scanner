@@ -1,8 +1,10 @@
 import { app, BrowserWindow, ipcMain, net } from 'electron'
+import path from 'path'
 import os from 'os'
 import express from 'express'
+import { Server, IncomingMessage, ServerResponse } from 'http'
 import range from 'lodash.range'
-import path from 'path'
+import { ScanPortResponse } from './types/types'
 
 // Error: net::ERR_CONNECTION_REFUSED
 // ERR_ADDRESS_INVALID - port 0
@@ -24,7 +26,7 @@ if (require('electron-squirrel-startup')) {
     app.quit()
 }
 
-let mainWindow
+let mainWindow: BrowserWindow
 
 const createWindow = () => {
     // Create the browser window.
@@ -81,7 +83,7 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
-let server: any
+let server: Server<typeof IncomingMessage, typeof ServerResponse>
 
 ipcMain.handle('start-server', () => {
     console.log('inside start-server')
@@ -212,7 +214,7 @@ async function scanPorts(portsToScan: number[]) {
             break
         }
 
-        const response = await scanPort(port)
+        const response = (await scanPort(port)) as false | ScanPortResponse
         if (response) {
             openPorts.push({
                 port,
@@ -298,7 +300,7 @@ ipcMain.handle('stop-scanning', () => {
 
 function getLocalhostAddress() {
     const networkInterfaces = os.networkInterfaces()
-    const addresses = []
+    const addresses: string[] = []
 
     // Loop through network interfaces to find the IPv4 addresses
     Object.keys(networkInterfaces).forEach((iface) => {

@@ -30,7 +30,7 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
     return itemRank.passed
 }
 
-const emptyArray = []
+const emptyArray: [] = []
 
 const dataMockup = [
     {
