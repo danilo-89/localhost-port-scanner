@@ -1,7 +1,8 @@
-import ActivePortsWrapper from '@/components/ActivePortsWrapper';
+// Components
 import InfoSection from '@/components/InfoSection';
-import PortsToScan from '@/components/PortsToScan';
 import ScannedPorts from '@/components/ScannedPorts';
+import Controls from '@/components/Controls';
+import Footer from '@/components/Footer';
 
 const Home = () => {
 	// console.log(range(1, 10));
@@ -17,10 +18,11 @@ const Home = () => {
 	// };
 
 	return (
-		<div>
-			<InfoSection />
+		<>
 			<div>
-				<ActivePortsWrapper />
+				<InfoSection />
+				<Controls />
+				<ScannedPorts />
 			</div>
 			<div>
 				<button
@@ -48,9 +50,8 @@ const Home = () => {
 					Scan Port
 				</button>
 			</div>
-			<PortsToScan />
-			<ScannedPorts />
-		</div>
+			<Footer />
+		</>
 	);
 };
 
