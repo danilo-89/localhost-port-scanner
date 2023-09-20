@@ -12,6 +12,6 @@ body {
 
 @layer base {
 	input {
-		@apply text-darkGunmetal;
+		@apply bg-charcoal rounded-md border border-darkGunmetal placeholder-[#9DA3AE];
 	}
 }
