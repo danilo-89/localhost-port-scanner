@@ -8,7 +8,7 @@ const Controls = () => {
 
 	return (
 		<>
-			<div className='bg-yankeesBlue flex justify-between'>
+			<div className='flex justify-between mb-7'>
 				<Button
 					type='button'
 					className='w-[30%]'
@@ -30,7 +30,7 @@ const Controls = () => {
 				>
 					STOP
 				</Button>
-				<Button type='button' className='w-[30%]' variation='secondary'>
+				<Button type='button' className='w-[30%]' variation='secondary' disabled>
 					KILL
 				</Button>
 			</div>
