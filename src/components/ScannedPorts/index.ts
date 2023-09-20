@@ -1,1 +1,1 @@
-export { default } from './ScannedPorts';
+export { default } from './ScannedPorts'
