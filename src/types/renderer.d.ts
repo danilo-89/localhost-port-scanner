@@ -1,11 +1,11 @@
 export interface IElectronAPI {
-	startServer: () => void;
-	stopServer: () => void;
-	scanPort: () => void;
+    startServer: () => void
+    stopServer: () => void
+    scanPort: () => void
 }
 
 declare global {
-	interface Window {
-		electronAPI: IElectronAPI;
-	}
+    interface Window {
+        electronAPI: IElectronAPI
+    }
 }

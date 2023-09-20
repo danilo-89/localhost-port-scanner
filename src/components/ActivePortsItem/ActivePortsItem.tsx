@@ -1,7 +1,7 @@
-import React from 'react';
+import React from 'react'
 
 const ActivePortsItem = () => {
-	return <div>ActivePortsItem</div>;
-};
+    return <div>ActivePortsItem</div>
+}
 
-export default ActivePortsItem;
+export default ActivePortsItem

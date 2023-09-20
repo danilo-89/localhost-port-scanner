@@ -1,55 +1,55 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer } from 'react'
 
 const reducer = (currentState: any, action: any) => {
-	// if (action.name === 'init') {
-	// 	return { ...currentState, isLoading: true, state: null, error: null };
-	// }
+    // if (action.name === 'init') {
+    // 	return { ...currentState, isLoading: true, state: null, error: null };
+    // }
 
-	return { ...currentState, ...action };
-};
+    return { ...currentState, ...action }
+}
 
 const useScanPorts = () => {
-	const [state, dispatch] = useReducer(reducer, {
-		data: null,
-		isLoading: false,
-		percentOfScanning: undefined,
-		error: null,
-	});
+    const [state, dispatch] = useReducer(reducer, {
+        data: null,
+        isLoading: false,
+        percentOfScanning: undefined,
+        error: null,
+    })
 
-	useEffect(() => {
-		// Init state listening and get the cleanup function
-		const cleanup = window.electronAPI.initPercent(dispatch);
-		console.log('inside listener uef');
-		// Call the cleanup function on component unmount
-		return cleanup;
-	}, []);
+    useEffect(() => {
+        // Init state listening and get the cleanup function
+        const cleanup = window.electronAPI.initPercent(dispatch)
+        console.log('inside listener uef')
+        // Call the cleanup function on component unmount
+        return cleanup
+    }, [])
 
-	const scanPorts = async (portsForScaning: (number | number[])[]) => {
-		dispatch({
-			data: null,
-			isLoading: true,
-			error: null,
-			percentOfScanning: 0,
-		});
-		try {
-			const response = await window.electronAPI.scanPorts(portsForScaning);
-			console.log(response);
-			dispatch({
-				data: response,
-			});
-		} catch (error: unknown) {
-			console.log(error);
-			dispatch({
-				error: error,
-			});
-		} finally {
-			dispatch({
-				isLoading: false,
-			});
-		}
-	};
+    const scanPorts = async (portsForScaning: (number | number[])[]) => {
+        dispatch({
+            data: null,
+            isLoading: true,
+            error: null,
+            percentOfScanning: 0,
+        })
+        try {
+            const response = await window.electronAPI.scanPorts(portsForScaning)
+            console.log(response)
+            dispatch({
+                data: response,
+            })
+        } catch (error: unknown) {
+            console.log(error)
+            dispatch({
+                error: error,
+            })
+        } finally {
+            dispatch({
+                isLoading: false,
+            })
+        }
+    }
 
-	return { state, dispatch, scanPorts };
-};
+    return { state, dispatch, scanPorts }
+}
 
-export default useScanPorts;
+export default useScanPorts
