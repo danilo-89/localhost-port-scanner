@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain, net } from 'electron';
+import os from 'os';
 import express from 'express';
 import range from 'lodash.range';
 import path from 'path';
@@ -97,34 +98,52 @@ ipcMain.handle('start-server', () => {
 
 function scanPort(port: number) {
 	return new Promise((resolve, reject) => {
-		const request = net.request(`http://localhost:${port}`);
-		request.on('response', (response) => {
-			// If the request was successful, the port is open
-			console.log(port, 'the port is open');
-			console.log(response);
-			console.log(response.headers);
-			console.log(response.rawHeaders);
+		try {
+			const url = `http://localhost:${port}`;
+			new URL(url); // Attempt to parse the URL
 
-			resolve(response);
-		});
-		request.on('error', (error) => {
-			// If the request failed, the port is closed
+			const request = net.request(url);
+			request.on('response', (response) => {
+				// If the request was successful, the port is open
+				console.log(port, 'the port is open');
+				console.log(response);
+				console.log(response.headers);
+				console.log(response.rawHeaders);
+
+				resolve(response);
+			});
+			request.on('error', (error) => {
+				console.log('error occured', port);
+				console.log('error occured');
+				// If the request failed, the port is maybe closed
+				console.log(error);
+				console.log(error.message);
+				console.log(error.name);
+				console.log(port, 'the port is closed');
+				if (error.message === 'net::ERR_CONNECTION_REFUSED') {
+					resolve(false);
+				} else {
+					resolve({
+						port: port,
+						statusMessage: parseError(error.message),
+						statusCode: undefined,
+						error: true,
+						headers: {},
+					});
+				}
+			});
+			request.end();
+		} catch (error) {
+			resolve({
+				port: port,
+				statusMessage: parseError(error.message),
+				statusCode: undefined,
+				error: true,
+				headers: {},
+			});
+			console.log('cauth');
 			console.log(error);
-			console.log(error.message);
-			console.log(error.name);
-			console.log(port, 'the port is closed');
-			if (error.message === 'net::ERR_CONNECTION_REFUSED') {
-				resolve(false);
-			} else {
-				resolve({
-					port: port,
-					statusMessage: parseError(error.message),
-					statusCode: undefined,
-					headers: {},
-				});
-			}
-		});
-		request.end();
+		}
 	});
 }
 
@@ -197,6 +216,7 @@ async function scanPorts(portsToScan: number[]) {
 				statusCode: response?.statusCode,
 				statusMessage: response?.statusMessage,
 				headers: response?.headers,
+				error: response?.error,
 			});
 		}
 
@@ -271,6 +291,27 @@ ipcMain.handle('scan-ports', async (event, portsArray) => {
 ipcMain.handle('stop-scanning', () => {
 	shouldContinueScanning = false;
 	return 'Scanning will stop.';
+});
+
+function getLocalhostAddress() {
+	const networkInterfaces = os.networkInterfaces();
+	const addresses = [];
+
+	// Loop through network interfaces to find the IPv4 addresses
+	Object.keys(networkInterfaces).forEach((iface) => {
+		networkInterfaces[iface].forEach((details) => {
+			if (details.family === 'IPv4' && !details.internal) {
+				addresses.push(details.address);
+			}
+		});
+	});
+
+	console.log(addresses);
+	return addresses.join(', ');
+}
+
+ipcMain.handle('get-ip', () => {
+	return getLocalhostAddress();
 });
 
 // const kill = require('kill-port')
