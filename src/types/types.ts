@@ -1,3 +1,5 @@
+import { HeadersReceivedResponse } from 'electron'
+
 export interface ScannedPortsState {
     data: null | any
     isLoading: boolean
@@ -19,8 +21,8 @@ export interface IScannedPorts {
 
 export interface ScanPortResponse {
     port: number
-    statusMessage: string
+    statusMessage: undefined | string
     statusCode: undefined | number
     error: undefined | true
-    headers: any
+    headers: HeadersReceivedResponse
 }
