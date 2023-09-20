@@ -13,6 +13,9 @@ import {
 } from '@tanstack/match-sorter-utils';
 import { usePortsForScanningContext } from '@/context/PortsForScanningContext';
 import { useScannedPortsContext } from '@/context/ScannedPortsContext';
+// import * as Checkbox from '@radix-ui/react-checkbox';
+import detectiveImg from '@/assets/detective.png';
+import LoaderDots from '../LoaderDots';
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 	// Rank the item
@@ -73,16 +76,18 @@ const ScannedPorts = () => {
 			{
 				id: 'select',
 				header: ({ table }) => (
-					<IndeterminateCheckbox
-						{...{
-							checked: table.getIsAllRowsSelected(),
-							indeterminate: table.getIsSomeRowsSelected(),
-							onChange: table.getToggleAllRowsSelectedHandler(),
-						}}
-					/>
+					<div className='pl-4'>
+						<IndeterminateCheckbox
+							{...{
+								checked: table.getIsAllRowsSelected(),
+								indeterminate: table.getIsSomeRowsSelected(),
+								onChange: table.getToggleAllRowsSelectedHandler(),
+							}}
+						/>
+					</div>
 				),
 				cell: ({ row }) => (
-					<div className='px-1'>
+					<div className='pl-4'>
 						<IndeterminateCheckbox
 							{...{
 								checked: row.getIsSelected(),
@@ -149,28 +154,51 @@ const ScannedPorts = () => {
 		debugTable: true,
 	});
 
+	if (state.isLoading)
+		return (
+			<div className='flex h-[calc(100vh-19em)] min-h-[22rem]'>
+				<figure className=' text-center text-manatee m-auto'>
+					<img
+						className='w-[29rem] max-w-[90%] mb-2'
+						src={detectiveImg}
+						alt='detective with magnifying glass illustration'
+						width={464}
+						height={'auto'}
+					/>
+					<figcaption>
+						Scanning, please wait
+						<LoaderDots />
+					</figcaption>
+				</figure>
+			</div>
+		);
+
 	return (
 		<div>
-			<div>
-				<DebouncedInput
-					value={globalFilter ?? ''}
-					onChange={(value) => setGlobalFilter(String(value))}
-					className='p-2 font-lg shadow border border-block'
-					placeholder='Search all columns...'
-				/>
-			</div>{' '}
-			<div>
-				<div className='h-2' />
-				<table>
-					<thead>
+			<div className='h-[calc(100vh-19em)] min-h-[22rem] overflow-auto'>
+				<table className='min-w-full'>
+					<thead className='sticky top-0'>
+						<tr className='bg-yankeesBlue sticky top-0'>
+							<th colSpan={10} className='sticky top-0'>
+								<div className='bg-yankeesBlue p-2 flex'>
+									<DebouncedInput
+										value={globalFilter ?? ''}
+										onChange={(value) => setGlobalFilter(String(value))}
+										className='px-2 py-1 font-normal text-sm ml-auto'
+										placeholder='Search all columns...'
+										type='search'
+									/>
+								</div>
+							</th>
+						</tr>
 						{table.getHeaderGroups().map((headerGroup) => (
-							<tr key={headerGroup.id}>
+							<tr key={headerGroup.id} className='bg-yankeesBlue'>
 								{headerGroup.headers.map((header) => {
 									return (
 										<th
 											key={header.id}
 											colSpan={header.colSpan}
-											className='text-left pr-5'
+											className='text-left pr-5 [&:nth-of-type(2)]:py-4 truncate max-w-[14rem] [&:not(:first-of-type):not(:nth-of-type(2)]:w-[10rem] [&:nth-of-type(2)]:w-[8rem] [&:nth-of-type(2)]:max-w-[8rem] text-manatee'
 										>
 											{header.isPlaceholder ? null : (
 												<div
@@ -215,7 +243,7 @@ const ScannedPorts = () => {
 											return (
 												<td
 													key={cell.id}
-													className="pr-5 [&:empty::after]:content-['-'] [&:nth-of-type(2)]:py-4"
+													className="pr-5 [&:empty::after]:content-['-'] [&:nth-of-type(2)]:py-4 [&:empty::after]:text-[#9DA3AE] truncate max-w-[14rem] [&:not(:first-of-type):not(:nth-of-type(2)]:w-[10rem] [&:nth-of-type(2)]:w-[8rem] [&:nth-of-type(2)]:max-w-[8rem]"
 													onClick={() => console.log(row)}
 												>
 													{flexRender(
@@ -240,6 +268,7 @@ const ScannedPorts = () => {
   </div> */}
 				<hr />
 				<pre>{JSON.stringify(sorting, null, 2)}</pre>
+				ScanningSpinner
 			</div>
 		</div>
 	);
