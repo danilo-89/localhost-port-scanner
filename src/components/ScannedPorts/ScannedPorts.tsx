@@ -4,6 +4,7 @@ import {
     getCoreRowModel,
     getFilteredRowModel,
     getSortedRowModel,
+    isRowSelected,
     useReactTable,
 } from '@tanstack/react-table'
 import {
@@ -16,6 +17,11 @@ import { useScannedPortsContext } from '@/context/ScannedPortsContext'
 // import * as Checkbox from '@radix-ui/react-checkbox';
 import detectiveImg from '@/assets/detective.png'
 import LoaderDots from '../LoaderDots'
+import Button from '../common/Button'
+import SvgInfoCircle from '../icons/SvgInfoCircle'
+import Modal from '../common/Modal'
+import ScannedPortInfo from '../ScannedPortInfo'
+import { useSelectedPortContext } from '@/context/SelectedPortContext'
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
     // Rank the item
@@ -68,35 +74,70 @@ const ScannedPorts = () => {
     const [sorting, setSorting] = useState<any>([])
     const [globalFilter, setGlobalFilter] = useState('')
     const [rowSelection, setRowSelection] = useState({})
+    const [clickedRowInfo, setClickedRowInfo] = useState(null)
+    const { setSelectedPort } = useSelectedPortContext()
+
+    const setModalState = (openState: boolean) => {
+        if (openState === false) {
+            setClickedRowInfo(null)
+        } else {
+            return
+        }
+    }
+
+    console.log({ rowSelection })
+    console.log({ clickedRowInfo })
 
     console.log('state', state.data)
 
     const columns = useMemo<any>(
         () => [
+            // {
+            //     id: 'select',
+            //     header: ({ table }) => (
+            //         <div className="pl-4">
+            //             <IndeterminateCheckbox
+            //                 {...{
+            //                     checked: table.getIsAllRowsSelected(),
+            //                     indeterminate: table.getIsSomeRowsSelected(),
+            //                     onChange:
+            //                         table.getToggleAllRowsSelectedHandler(),
+            //                 }}
+            //             />
+            //         </div>
+            //     ),
+            //     cell: ({ row }) => (
+            //         <div className="pl-4">
+            //             <IndeterminateCheckbox
+            //                 {...{
+            //                     checked: row.getIsSelected(),
+            //                     disabled: !row.getCanSelect(),
+            //                     indeterminate: row.getIsSomeSelected(),
+            //                     onChange: row.getToggleSelectedHandler(),
+            //                     // onClick: row.getsfs()
+            //                 }}
+            //             />
+            //         </div>
+            //     ),
+            // },
             {
-                id: 'select',
-                header: ({ table }) => (
-                    <div className="pl-4">
-                        <IndeterminateCheckbox
-                            {...{
-                                checked: table.getIsAllRowsSelected(),
-                                indeterminate: table.getIsSomeRowsSelected(),
-                                onChange:
-                                    table.getToggleAllRowsSelectedHandler(),
-                            }}
-                        />
-                    </div>
-                ),
+                id: 'info',
+                header: ({ table }) => <div className="pl-4">Info</div>,
                 cell: ({ row }) => (
                     <div className="pl-4">
-                        <IndeterminateCheckbox
-                            {...{
-                                checked: row.getIsSelected(),
-                                disabled: !row.getCanSelect(),
-                                indeterminate: row.getIsSomeSelected(),
-                                onChange: row.getToggleSelectedHandler(),
+                        <Button
+                            className="py-2"
+                            type="button"
+                            size="sm"
+                            variation="transparent"
+                            hasBorder={false}
+                            onClick={(e) => {
+                                e.stopPropagation(),
+                                    setClickedRowInfo(row.original)
                             }}
-                        />
+                        >
+                            <SvgInfoCircle />
+                        </Button>
                     </div>
                 ),
             },
@@ -109,7 +150,9 @@ const ScannedPorts = () => {
             {
                 accessorKey: 'statusMessage',
                 header: 'Status',
-                cell: (info) => info.getValue(),
+                cell: (info) => (
+                    <span className="lowercase">{info.getValue()}</span>
+                ),
                 footer: (props) => props.column.id,
             },
             {
@@ -145,6 +188,7 @@ const ScannedPorts = () => {
             rowSelection,
         },
         enableRowSelection: true,
+        enableMultiRowSelection: false,
         onRowSelectionChange: setRowSelection,
         onGlobalFilterChange: setGlobalFilter,
         globalFilterFn: fuzzyFilter,
@@ -155,18 +199,23 @@ const ScannedPorts = () => {
         debugTable: true,
     })
 
+    useEffect(() => {
+        setSelectedPort(table.getSelectedRowModel().rows?.[0]?.original || null)
+        console.log('test')
+    }, [table, rowSelection, setSelectedPort])
+
     if (state.isLoading)
         return (
-            <div className="flex h-[calc(100vh-19em)] min-h-[22rem]">
-                <figure className="m-auto text-center text-manatee">
+            <div className="flex h-[calc(100vh-19em)] max-h-[32rem] min-h-[22rem]">
+                <figure className="relative m-auto text-center text-manatee">
                     <img
-                        className="mb-2 w-[29rem] max-w-[90%]"
+                        className="m-auto mb-2 w-[29rem] max-w-[90%]"
                         src={detectiveImg}
                         alt="detective with magnifying glass illustration"
                         width={464}
                         height={'auto'}
                     />
-                    <figcaption>
+                    <figcaption className="speech-bubble absolute right-[6.2rem] top-[-1rem] translate-x-full rounded-lg px-6 py-3 font-semibold text-manatee">
                         Scanning, please wait
                         <LoaderDots />
                     </figcaption>
@@ -176,7 +225,14 @@ const ScannedPorts = () => {
 
     return (
         <div>
-            <div className="h-[calc(100vh-19em)] min-h-[22rem] overflow-auto">
+            {clickedRowInfo ? (
+                <Modal
+                    setIsOpen={(openState: boolean) => setModalState(openState)}
+                >
+                    <ScannedPortInfo clickedRowInfo={clickedRowInfo} />
+                </Modal>
+            ) : null}
+            <div className="styled-scrollbar h-[calc(100vh-19em)] min-h-[22rem] overflow-auto">
                 <table className="min-w-full">
                     <thead className="sticky top-0">
                         <tr className="sticky top-0 bg-yankeesBlue">
@@ -247,7 +303,18 @@ const ScannedPorts = () => {
                                 return (
                                     <tr
                                         key={row.id}
-                                        className="odd:bg-charcoal even:bg-yankeesBlue"
+                                        className={
+                                            row.getIsSelected()
+                                                ? 'bg-[#521687]'
+                                                : 'odd:bg-charcoal even:bg-yankeesBlue'
+                                        }
+                                        onClick={() => {
+                                            // Toggle the row selection when the row is clicked
+                                            if (row.getCanSelect()) {
+                                                row.toggleSelected()
+                                            }
+                                        }}
+                                        // onClick={() => setSelectedRow(row)}
                                         // className='border-y-[1rem] border-[transparent]'
                                     >
                                         {/* <td>
@@ -257,7 +324,7 @@ const ScannedPorts = () => {
                                             return (
                                                 <td
                                                     key={cell.id}
-                                                    className="[&:not(:first-of-type):not(:nth-of-type(2)]:w-[10rem] max-w-[14rem] truncate pr-5 [&:empty::after]:text-[#9DA3AE] [&:empty::after]:content-['-'] [&:nth-of-type(2)]:w-[8rem] [&:nth-of-type(2)]:max-w-[8rem] [&:nth-of-type(2)]:py-4"
+                                                    className={`[&:not(:first-of-type):not(:nth-of-type(2)]:w-[10rem] max-w-[14rem] truncate pr-5 [&:empty::after]:text-[#9DA3AE] [&:empty::after]:content-['-'] [&:nth-of-type(2)]:w-[8rem] [&:nth-of-type(2)]:max-w-[8rem] [&:nth-of-type(2)]:py-4 `}
                                                     onClick={() =>
                                                         console.log(row)
                                                     }
@@ -285,7 +352,7 @@ const ScannedPorts = () => {
   </div> */}
                 <hr />
                 <pre>{JSON.stringify(sorting, null, 2)}</pre>
-                ScanningSpinner
+                ScanningSpinner M
             </div>
         </div>
     )
