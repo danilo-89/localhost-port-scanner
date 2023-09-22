@@ -7,8 +7,10 @@ import {
     getCoreRowModel,
     getFilteredRowModel,
     getSortedRowModel,
+    PaginationState,
     isRowSelected,
     useReactTable,
+    getPaginationRowModel,
 } from '@tanstack/react-table'
 import {
     RankingInfo,
@@ -118,7 +120,8 @@ const ScannedPorts = () => {
                             variation="transparent"
                             hasBorder={false}
                             onClick={(e) => {
-                                e.stopPropagation(), setClickedRowInfo(row)
+                                e.stopPropagation(),
+                                    setClickedRowInfo(row.original)
                             }}
                         >
                             <SvgInfoCircle />
@@ -176,6 +179,7 @@ const ScannedPorts = () => {
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
         debugTable: true,
     })
 
@@ -331,6 +335,76 @@ const ScannedPorts = () => {
     <button onClick={() => refreshData()}>Refresh Data</button>
   </div> */}
                 <hr />
+                <div className="flex items-center gap-2">
+                    <button
+                        className="rounded border p-1"
+                        onClick={() => table.setPageIndex(0)}
+                        disabled={!table.getCanPreviousPage()}
+                    >
+                        {'<<'}
+                    </button>
+                    <button
+                        className="rounded border p-1"
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                    >
+                        {'<'}
+                    </button>
+                    <button
+                        className="rounded border p-1"
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                    >
+                        {'>'}
+                    </button>
+                    <button
+                        className="rounded border p-1"
+                        onClick={() =>
+                            table.setPageIndex(table.getPageCount() - 1)
+                        }
+                        disabled={!table.getCanNextPage()}
+                    >
+                        {'>>'}
+                    </button>
+                    <span className="flex items-center gap-1">
+                        <div>Page</div>
+                        <strong>
+                            {table.getState().pagination.pageIndex + 1} of{' '}
+                            {table.getPageCount()}
+                        </strong>
+                    </span>
+                    <span className="flex items-center gap-1">
+                        | Go to page:
+                        <input
+                            type="number"
+                            defaultValue={
+                                table.getState().pagination.pageIndex + 1
+                            }
+                            onChange={(e) => {
+                                const page = e.target.value
+                                    ? Number(e.target.value) - 1
+                                    : 0
+                                table.setPageIndex(page)
+                            }}
+                            className="w-16 rounded border p-1"
+                        />
+                    </span>
+                    <select
+                        value={table.getState().pagination.pageSize}
+                        onChange={(e) => {
+                            table.setPageSize(Number(e.target.value))
+                        }}
+                    >
+                        {[10, 20, 30, 40, 50].map((pageSize) => (
+                            <option
+                                key={pageSize}
+                                value={pageSize}
+                            >
+                                Show {pageSize}
+                            </option>
+                        ))}
+                    </select>
+                </div>
                 <pre>{JSON.stringify(sorting, null, 2)}</pre>
             </div>
         </div>
