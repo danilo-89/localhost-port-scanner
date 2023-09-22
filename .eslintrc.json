@@ -8,6 +8,14 @@
             "typescript": {}
         }
     },
+    "overrides": [
+        {
+            "files": ["*.ts", "*.tsx"],
+            "rules": {
+                "react/prop-types": "off"
+            }
+        }
+    ],
     "env": {
         "browser": true,
         "es6": true,
