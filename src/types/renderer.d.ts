@@ -6,6 +6,7 @@ export interface IElectronAPI {
     scanPorts: (arg1: (number | number[])[]) => Promise<void>
     getIP: () => Promise<string>
     initPercent: (arg1: Dispatch<{ percentOfScanning: number }>) => void
+    killPort: (arg1: number) => Promise<false | any>
 }
 
 declare global {
