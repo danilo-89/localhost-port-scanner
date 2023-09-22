@@ -1,7 +1,7 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
-import { contextBridge, ipcRenderer } from 'electron'
+import { IpcRendererEvent, contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('electronAPI', {
     startServer: () => {
@@ -17,9 +17,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
         return ipcRenderer.invoke('scan-ports', portsArray)
     },
 
-    initPercent: (setState) => {
+    initPercent: (setState: (arg1: { percentOfScanning: number }) => void) => {
         console.log('inside initPercent')
-        const stateUpdateHandler = (event, newState) => {
+        const stateUpdateHandler = (
+            event: IpcRendererEvent,
+            newState: number
+        ) => {
             console.log({ receivedState: newState })
             setState({ percentOfScanning: newState })
         }
@@ -41,5 +44,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
     getIP: async () => {
         return await ipcRenderer.invoke('get-ip')
+    },
+
+    killPort: async (port: number) => {
+        return await ipcRenderer.invoke('kill-port', port)
     },
 })

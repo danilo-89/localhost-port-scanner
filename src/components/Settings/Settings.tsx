@@ -44,7 +44,7 @@ const Settings = () => {
             <div className="mb-8">
                 <h2 className="text-lg font-bold">Settings</h2>{' '}
             </div>
-            <div className="flex h-[7rem] flex-wrap content-start justify-start gap-1 overflow-auto rounded-lg bg-charcoal p-3">
+            <div className="styled-scrollbar flex h-[7.5rem] flex-wrap content-start justify-start gap-1 overflow-auto rounded-lg bg-charcoal p-3">
                 {state.map((item: number | number[]) => {
                     const itemValue = Array.isArray(item)
                         ? item.join(' - ')
@@ -61,6 +61,7 @@ const Settings = () => {
                                 variation="neutral"
                                 size="sm"
                                 className="rounded-full"
+                                onClick={() => console.log(item)}
                             >
                                 x
                             </Button>

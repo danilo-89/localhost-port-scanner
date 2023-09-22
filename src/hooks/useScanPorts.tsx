@@ -1,10 +1,12 @@
 import { useEffect, useReducer } from 'react'
 
-const reducer = (currentState: any, action: any) => {
-    // if (action.name === 'init') {
-    // 	return { ...currentState, isLoading: true, state: null, error: null };
-    // }
+// Types
+import { ScannedPortsState } from '@/types/types'
 
+const reducer = (
+    currentState: ScannedPortsState,
+    action: Partial<ScannedPortsState>
+) => {
     return { ...currentState, ...action }
 }
 

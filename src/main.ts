@@ -1,22 +1,32 @@
-import { app, BrowserWindow, ipcMain, net } from 'electron'
+import { app, BrowserWindow, ipcMain, net, shell } from 'electron'
+import path from 'path'
 import os from 'os'
 import express from 'express'
+import { Server, IncomingMessage, ServerResponse } from 'http'
 import range from 'lodash.range'
-import path from 'path'
+import { ScanPortResponse } from './types/types'
+import kill from 'kill-port'
 
 // Error: net::ERR_CONNECTION_REFUSED
 // ERR_ADDRESS_INVALID - port 0
 // ERR_UNSAFE_PORT - port 1
 
 const parseError = (errorValue: string) => {
-    switch (errorValue) {
-        case 'net::ERR_ADDRESS_INVALID':
-            return 'Address Invalid'
-        case 'net::ERR_UNSAFE_PORT':
-            return 'Unsafe Port'
-        default:
-            return errorValue
+    if (errorValue.startsWith('net::ERR_')) {
+        return errorValue.slice(9).replaceAll('_', ' ')
     }
+
+    return errorValue
+    // switch (errorValue) {
+    //     case 'net::ERR_ADDRESS_INVALID':
+    //         return 'Address Invalid'
+    //     case 'net::ERR_UNSAFE_PORT':
+    //         return 'Unsafe Port'
+    //     case 'net::ERR_INVALID_HTTP_RESPONSE':
+    //         return 'Invalid Http Response'
+    //     default:
+    //         return errorValue
+    // }
 }
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -24,7 +34,7 @@ if (require('electron-squirrel-startup')) {
     app.quit()
 }
 
-let mainWindow
+let mainWindow: BrowserWindow
 
 const createWindow = () => {
     // Create the browser window.
@@ -55,6 +65,11 @@ const createWindow = () => {
     mainWindow.on('close', () => {
         app.quit()
     })
+
+    mainWindow.webContents.setWindowOpenHandler(({ url }: { url: string }) => {
+        handleUrl(url)
+        return { action: 'deny' }
+    })
 }
 
 // This method will be called when Electron has finished
@@ -81,7 +96,7 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
-let server: any
+let server: Server<typeof IncomingMessage, typeof ServerResponse>
 
 ipcMain.handle('start-server', () => {
     console.log('inside start-server')
@@ -212,7 +227,7 @@ async function scanPorts(portsToScan: number[]) {
             break
         }
 
-        const response = await scanPort(port)
+        const response = (await scanPort(port)) as false | ScanPortResponse
         if (response) {
             openPorts.push({
                 port,
@@ -298,7 +313,7 @@ ipcMain.handle('stop-scanning', () => {
 
 function getLocalhostAddress() {
     const networkInterfaces = os.networkInterfaces()
-    const addresses = []
+    const addresses: string[] = []
 
     // Loop through network interfaces to find the IPv4 addresses
     Object.keys(networkInterfaces).forEach((iface) => {
@@ -317,8 +332,55 @@ ipcMain.handle('get-ip', () => {
     return getLocalhostAddress()
 })
 
+async function killPort(port: number) {
+    console.log({ port })
+    try {
+        return await kill(port)
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+ipcMain.handle('kill-port', (event, port: number) => {
+    return killPort(port)
+})
+
 // const kill = require('kill-port')
 
 // kill(port, 'tcp')
 //   .then(console.log)
 //   .catch(console.log)
+
+// Intercept a click on anchor (ideally with `target="_blank"`)
+// This replaces 'new-window' event which is being deprecated
+
+async function handleUrl(url: string) {
+    const parsedUrl = maybeParseUrl(url)
+    if (!parsedUrl) {
+        return
+    }
+
+    const { protocol } = parsedUrl
+    // We could handle all possible link cases here, not only http/https
+    if (protocol === 'http:' || protocol === 'https:') {
+        try {
+            await shell.openExternal(url)
+        } catch (error: unknown) {
+            console.error(`Failed to open url: ${error}`)
+        }
+    }
+}
+
+function maybeParseUrl(value: string): URL | undefined {
+    if (typeof value === 'string') {
+        try {
+            return new URL(value)
+        } catch (err) {
+            // Errors are ignored, as we only want to check if the value is a valid url
+            console.error(`Failed to parse url: ${value}`)
+        }
+    }
+
+    return undefined
+}

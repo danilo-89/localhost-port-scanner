@@ -1,11 +1,18 @@
 import { createContext, ReactNode, useContext, useReducer } from 'react'
 
-const PortsForScanningContext = createContext<any>({
-    state: 0,
-    dispatch: () => null,
+type StateItem = number | [number, number]
+
+interface IPortsForScanningContext {
+    state: StateItem[]
+    dispatch: (arg1: StateItem) => void
+}
+
+const PortsForScanningContext = createContext<IPortsForScanningContext>({
+    state: [],
+    dispatch: (_arg1) => null,
 })
 
-const reducer = (state: any[], action: number | [number, number]) => {
+const reducer = (state: StateItem[], action: StateItem) => {
     if (action !== undefined) {
         return [...state, action]
     }

@@ -1,15 +1,20 @@
-import useScanPorts from '@/hooks/useScanPorts'
-import { createContext, ReactNode, useContext, useReducer } from 'react'
+import { createContext, ReactNode, useContext } from 'react'
 
-const ScannedPortsContext = createContext<any>({
+// Hooks
+import useScanPorts from '@/hooks/useScanPorts'
+
+// Types
+import { IScannedPorts } from '@/types/types'
+
+const ScannedPortsContext = createContext<IScannedPorts>({
     state: {
         data: null,
         isLoading: false,
         percentOfScanning: undefined,
         error: null,
     },
-    dispatch: () => null,
-    scanPorts: () => null,
+    dispatch: (arg1) => null,
+    scanPorts: async (arg1) => null,
 })
 
 export function ScannedPortsProvider({ children }: { children: ReactNode }) {
