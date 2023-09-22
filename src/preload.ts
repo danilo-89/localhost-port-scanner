@@ -45,4 +45,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getIP: async () => {
         return await ipcRenderer.invoke('get-ip')
     },
+
+    killPort: async (port: number) => {
+        return await ipcRenderer.invoke('kill-port', port)
+    },
 })
