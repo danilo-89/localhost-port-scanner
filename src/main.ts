@@ -139,7 +139,14 @@ function scanPort(port: number) {
                 console.log(error.name)
                 console.log(port, 'the port is closed')
                 if (error.message === 'net::ERR_CONNECTION_REFUSED') {
-                    resolve(false)
+                    // resolve(false)
+                    resolve({
+                        port: port,
+                        statusMessage: parseError(error.message),
+                        statusCode: undefined,
+                        error: true,
+                        headers: {},
+                    })
                 } else {
                     resolve({
                         port: port,
