@@ -1,5 +1,8 @@
 import { HTMLProps, useEffect, useMemo, useRef, useState } from 'react'
 import {
+    ColumnDef,
+    FilterFn,
+    createColumnHelper,
     flexRender,
     getCoreRowModel,
     getFilteredRowModel,
@@ -69,6 +72,18 @@ const dataMockup = [
     },
 ]
 
+type Port = {
+    port: number
+    statusMessage: string
+    headers: {
+        'content-type': string
+        'x-powered-by': string
+        connection: string
+    }
+}
+
+const columnHelper = createColumnHelper<Port>()
+
 const ScannedPorts = () => {
     const { state } = useScannedPortsContext()
     const [sorting, setSorting] = useState<any>([])
@@ -90,39 +105,10 @@ const ScannedPorts = () => {
 
     console.log('state', state.data)
 
-    const columns = useMemo<any>(
+    const columns = useMemo(
         () => [
-            // {
-            //     id: 'select',
-            //     header: ({ table }) => (
-            //         <div className="pl-4">
-            //             <IndeterminateCheckbox
-            //                 {...{
-            //                     checked: table.getIsAllRowsSelected(),
-            //                     indeterminate: table.getIsSomeRowsSelected(),
-            //                     onChange:
-            //                         table.getToggleAllRowsSelectedHandler(),
-            //                 }}
-            //             />
-            //         </div>
-            //     ),
-            //     cell: ({ row }) => (
-            //         <div className="pl-4">
-            //             <IndeterminateCheckbox
-            //                 {...{
-            //                     checked: row.getIsSelected(),
-            //                     disabled: !row.getCanSelect(),
-            //                     indeterminate: row.getIsSomeSelected(),
-            //                     onChange: row.getToggleSelectedHandler(),
-            //                     // onClick: row.getsfs()
-            //                 }}
-            //             />
-            //         </div>
-            //     ),
-            // },
-            {
+            columnHelper.display({
                 id: 'info',
-                header: ({ table }) => <div className="pl-4">Info</div>,
                 cell: ({ row }) => (
                     <div className="pl-4">
                         <Button
@@ -132,47 +118,41 @@ const ScannedPorts = () => {
                             variation="transparent"
                             hasBorder={false}
                             onClick={(e) => {
-                                e.stopPropagation(),
-                                    setClickedRowInfo(row.original)
+                                e.stopPropagation(), setClickedRowInfo(row)
                             }}
                         >
                             <SvgInfoCircle />
                         </Button>
                     </div>
                 ),
-            },
-            {
-                accessorKey: 'port',
+            }),
+            columnHelper.accessor('port', {
                 header: 'Port',
                 cell: (info) => info.getValue(),
                 footer: (props) => props.column.id,
-            },
-            {
-                accessorKey: 'statusMessage',
+            }),
+            columnHelper.accessor('statusMessage', {
                 header: 'Status',
                 cell: (info) => (
                     <span className="lowercase">{info.getValue()}</span>
                 ),
                 footer: (props) => props.column.id,
-            },
-            {
-                accessorKey: 'headers.content-type',
+            }),
+            columnHelper.accessor('headers.content-type', {
                 header: 'Content Type',
                 cell: (info) => info.getValue(),
                 footer: (props) => props.column.id,
-            },
-            {
-                accessorKey: 'headers.x-powered-by',
+            }),
+            columnHelper.accessor('headers.x-powered-by', {
                 header: 'X-Powered-By',
                 cell: (info) => info.getValue(),
                 footer: (props) => props.column.id,
-            },
-            {
-                accessorKey: 'headers.connection',
+            }),
+            columnHelper.accessor('headers.connection', {
                 header: 'Connection',
                 cell: (info) => info.getValue(),
                 footer: (props) => props.column.id,
-            },
+            }),
         ],
         []
     )
@@ -352,7 +332,6 @@ const ScannedPorts = () => {
   </div> */}
                 <hr />
                 <pre>{JSON.stringify(sorting, null, 2)}</pre>
-                ScanningSpinner M
             </div>
         </div>
     )
