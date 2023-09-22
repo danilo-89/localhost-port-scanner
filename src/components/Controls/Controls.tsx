@@ -1,10 +1,14 @@
 import { usePortsForScanningContext } from '@/context/PortsForScanningContext'
 import { useScannedPortsContext } from '@/context/ScannedPortsContext'
 import Button from '../common/Button'
+import { useSelectedPortContext } from '@/context/SelectedPortContext'
 
 const Controls = () => {
     const { state, dispatch } = usePortsForScanningContext()
     const { state: scanningResult, scanPorts } = useScannedPortsContext()
+    const { selectedPort } = useSelectedPortContext()
+
+    console.log({ selectedPort })
 
     return (
         <>
@@ -34,7 +38,15 @@ const Controls = () => {
                     type="button"
                     className="w-[30%]"
                     variation="secondary"
-                    disabled
+                    disabled={!selectedPort}
+                    onClick={async () =>
+                        console.log(
+                            // selectedPort?.port
+                            await window.electronAPI.killPort(
+                                selectedPort?.port
+                            )
+                        )
+                    }
                 >
                     KILL
                 </Button>
