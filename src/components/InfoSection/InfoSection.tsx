@@ -36,7 +36,7 @@ const getScanningStatus = (
 }
 
 const InfoSection = () => {
-    const { state } = usePortsForScanningContext()
+    const { state, portsForScanning } = usePortsForScanningContext()
     const [showSettings, setShowSettings] = useState(false)
     const { state: scanningResult } = useScannedPortsContext()
 
@@ -47,7 +47,12 @@ const InfoSection = () => {
             <section className="relative mb-7 flex w-full items-center rounded-lg bg-yankeesBlue p-8">
                 <div>
                     <div className="mb-2 text-manatee">
-                        Total ports for scanning: <span>{state.length}</span>
+                        Total ports for scanning:{' '}
+                        <span>
+                            {portsForScanning.length
+                                ? null
+                                : '0 - select ports for scanning'}
+                        </span>
                     </div>
                     <div className="text-xl">
                         {getScanningStatus(
