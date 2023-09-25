@@ -5,6 +5,8 @@ export const portStatusMessages = {
     ADDRESS_INVALID: `This status indicates that the target address is not valid or cannot be resolved. Some common cases that might result in an "Address Invalid" status are: Non-existent Host, DNS Resolution Failure, Network Configuration Issues, Firewall or Network Filtering, Local Configuration Errors, Host Unreachable.`,
     INVALID_URL:
         'This status typically means that the URL (Uniform Resource Locator) provided is not in a valid format or does not conform to the expected structure for URLs. This message suggests that the URL cannot be interpreted or processed because it contains syntax errors, missing components, or other issues that prevent it from being recognized as a valid web address.',
+    CONNECTION_REFUSED:
+        '"Connection Refused" typically means that the port is closed. However, in certain scenarios, "Connection Refused" can stem from various underlying causes, such as Firewall Configuration, Temporary Overload, or Misconfiguration.',
     UNDEFINED: 'No info about this status.',
 }
 
