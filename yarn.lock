@@ -1154,6 +1154,13 @@
   dependencies:
     "@types/lodash" "*"
 
+"@types/lodash.sorteduniq@^4.2.7":
+  version "4.2.7"
+  resolved "https://registry.yarnpkg.com/@types/lodash.sorteduniq/-/lodash.sorteduniq-4.2.7.tgz#9d12a47ca27695801da2b5ba443a35c98872301d"
+  integrity sha512-fhsbXH0C7vYPxYMcg0oV/CmADt+Vm7t7YhDsVcgFWthhdWxI2k9eWVG7ridbxWnR6yBJbB4yUg95SEyft0xu/w==
+  dependencies:
+    "@types/lodash" "*"
+
 "@types/lodash@*":
   version "4.14.198"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.198.tgz#4d27465257011aedc741a809f1269941fa2c5d4c"
@@ -3047,6 +3054,11 @@ gauge@^4.0.3:
     strip-ansi "^6.0.1"
     wide-align "^1.1.5"
 
+generic-pool@^3.9.0:
+  version "3.9.0"
+  resolved "https://registry.yarnpkg.com/generic-pool/-/generic-pool-3.9.0.tgz#36f4a678e963f4fdb8707eab050823abc4e8f5e4"
+  integrity sha512-hymDOu5B53XvN4QT9dBmZxPX4CWhBPPLguTZ9MMFeFa/Kg0xWVfylOVNlJji/E7yTZWFd/q9GO5TxDLq156D7g==
+
 gensync@^1.0.0-beta.2:
   version "1.0.0-beta.2"
   resolved "https://registry.yarnpkg.com/gensync/-/gensync-1.0.0-beta.2.tgz#32a6ee76c3d7f52d46b2b1ae5d93fea8580a25e0"
@@ -3925,6 +3937,11 @@ lodash.sortby@^4.7.0:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/lodash.sortby/-/lodash.sortby-4.7.0.tgz#edd14c824e2cc9c1e0b0a1b42bb5210516a42438"
   integrity sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==
+
+lodash.sorteduniq@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/lodash.sorteduniq/-/lodash.sorteduniq-4.2.0.tgz#35af1d7d5c6ac2920265fdded6d98850608ff5f6"
+  integrity sha512-w2QKhCYv/Hk8B7XD/3bG7JJENYELKtcR5nDA0gDg2qRTtXu2skvEv3VEuxOlbhdGGSyd2PSYoVurCjLL0Pt/iw==
 
 lodash.template@^4.2.2:
   version "4.5.0"
