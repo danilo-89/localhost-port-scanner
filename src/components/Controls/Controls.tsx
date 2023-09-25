@@ -4,7 +4,7 @@ import Button from '../common/Button'
 import { useSelectedPortContext } from '@/context/SelectedPortContext'
 
 const Controls = () => {
-    const { state, dispatch } = usePortsForScanningContext()
+    const { state, dispatch, portsForScanning } = usePortsForScanningContext()
     const { state: scanningResult, scanPorts } = useScannedPortsContext()
     const { selectedPort } = useSelectedPortContext()
 
@@ -16,9 +16,11 @@ const Controls = () => {
                 <Button
                     type="button"
                     className="w-[30%]"
-                    disabled={scanningResult.isLoading}
+                    disabled={
+                        scanningResult.isLoading || !portsForScanning.length
+                    }
                     onClick={() => {
-                        scanPorts(state)
+                        scanPorts(portsForScanning)
                     }}
                 >
                     SCAN
