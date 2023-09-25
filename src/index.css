@@ -11,7 +11,8 @@ body {
 }
 
 @layer base {
-    input {
+    input,
+    select {
         @apply rounded-md border border-darkGunmetal bg-charcoal placeholder-[#9DA3AE];
     }
 }
