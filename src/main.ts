@@ -1,4 +1,11 @@
-import { app, BrowserWindow, ipcMain, net, shell } from 'electron'
+import {
+    app,
+    BrowserWindow,
+    ClientRequest,
+    ipcMain,
+    net,
+    shell,
+} from 'electron'
 import path from 'path'
 import os from 'os'
 import express from 'express'
@@ -6,6 +13,7 @@ import { Server, IncomingMessage, ServerResponse } from 'http'
 import range from 'lodash.range'
 import { ScanPortResponse } from './types/types'
 import kill from 'kill-port'
+import genericPool from 'generic-pool'
 
 // Error: net::ERR_CONNECTION_REFUSED
 // ERR_ADDRESS_INVALID - port 0
@@ -175,87 +183,87 @@ function scanPort(port: number) {
 let portsAreScanning = false
 let shouldContinueScanning = true
 
-async function scanPorts(portsToScan: number[]) {
-    const openPorts = []
-    const totalPorts = portsToScan.length
-    // const totalPorts = endPort - startPort + 1;
+// async function scanPorts(portsToScan: number[]) {
+//     const openPorts = []
+//     const totalPorts = portsToScan.length
+//     // const totalPorts = endPort - startPort + 1;
 
-    // console.log(totalPorts);
-    // return;
+//     // console.log(totalPorts);
+//     // return;
 
-    if (portsAreScanning) {
-        console.log('Ports are already scanning!')
-        throw new Error('Ports are already scanning!')
-    }
+//     if (portsAreScanning) {
+//         console.log('Ports are already scanning!')
+//         throw new Error('Ports are already scanning!')
+//     }
 
-    portsAreScanning = true
-    shouldContinueScanning = true
+//     portsAreScanning = true
+//     shouldContinueScanning = true
 
-    // [3000, 3001].forEach((port) => {
-    // 	const response = await scanPort(port);
-    // 	if (response) {
-    // 		openPorts.push({
-    // 			port,
-    // 			statusCode: response?.statusCode,
-    // 			statusMessage: response?.statusMessage,
-    // 			headers: response?.headers,
-    // 		});
-    // 	}
+//     // [3000, 3001].forEach((port) => {
+//     // 	const response = await scanPort(port);
+//     // 	if (response) {
+//     // 		openPorts.push({
+//     // 			port,
+//     // 			statusCode: response?.statusCode,
+//     // 			statusMessage: response?.statusMessage,
+//     // 			headers: response?.headers,
+//     // 		});
+//     // 	}
 
-    // 	// Calculate and call the progress callback
-    // 	const percentComplete = ((port - startPort + 1) / totalPorts) * 100;
-    // 	// console.log({ percentComplete });
-    // 	mainWindow?.webContents.send('scan-ports-progress', percentComplete);
-    // });
-    // for (let port = startPort; port <= endPort; port++) {
-    // 	const response = await scanPort(port);
-    // 	if (response) {
-    // 		openPorts.push({
-    // 			port,
-    // 			statusCode: response?.statusCode,
-    // 			statusMessage: response?.statusMessage,
-    // 			headers: response?.headers,
-    // 		});
-    // 	}
+//     // 	// Calculate and call the progress callback
+//     // 	const percentComplete = ((port - startPort + 1) / totalPorts) * 100;
+//     // 	// console.log({ percentComplete });
+//     // 	mainWindow?.webContents.send('scan-ports-progress', percentComplete);
+//     // });
+//     // for (let port = startPort; port <= endPort; port++) {
+//     // 	const response = await scanPort(port);
+//     // 	if (response) {
+//     // 		openPorts.push({
+//     // 			port,
+//     // 			statusCode: response?.statusCode,
+//     // 			statusMessage: response?.statusMessage,
+//     // 			headers: response?.headers,
+//     // 		});
+//     // 	}
 
-    // 	// Calculate
-    // 	const percentComplete = ((port - startPort + 1) / totalPorts) * 100;
-    // 	// console.log({ percentComplete });
-    // 	mainWindow?.webContents.send('scan-ports-progress', percentComplete);
-    // }
-    let index = 0
+//     // 	// Calculate
+//     // 	const percentComplete = ((port - startPort + 1) / totalPorts) * 100;
+//     // 	// console.log({ percentComplete });
+//     // 	mainWindow?.webContents.send('scan-ports-progress', percentComplete);
+//     // }
+//     let index = 0
 
-    for (const port of portsToScan) {
-        index++
+//     for (const port of portsToScan) {
+//         index++
 
-        // Check if the flag is set to false, and if so, stop scanning
-        if (!shouldContinueScanning) {
-            console.log('Scanning stopped.')
-            break
-        }
+//         // Check if the flag is set to false, and if so, stop scanning
+//         if (!shouldContinueScanning) {
+//             console.log('Scanning stopped.')
+//             break
+//         }
 
-        const response = (await scanPort(port)) as false | ScanPortResponse
-        if (response) {
-            openPorts.push({
-                port,
-                statusCode: response?.statusCode,
-                statusMessage: response?.statusMessage,
-                headers: response?.headers,
-                error: response?.error,
-            })
-        }
+//         const response = (await scanPort(port)) as false | ScanPortResponse
+//         if (response) {
+//             openPorts.push({
+//                 port,
+//                 statusCode: response?.statusCode,
+//                 statusMessage: response?.statusMessage,
+//                 headers: response?.headers,
+//                 error: response?.error,
+//             })
+//         }
 
-        // Calculate and call the progress callback
-        const percentComplete = (index / totalPorts) * 100
-        console.log({ index }, { totalPorts })
-        mainWindow?.webContents.send('scan-ports-progress', percentComplete)
-    }
+//         // Calculate and call the progress callback
+//         const percentComplete = (index / totalPorts) * 100
+//         console.log({ index }, { totalPorts })
+//         mainWindow?.webContents.send('scan-ports-progress', percentComplete)
+//     }
 
-    console.log({ portsToScan })
-    console.log({ openPorts })
-    portsAreScanning = false
-    return openPorts
-}
+//     console.log({ portsToScan })
+//     console.log({ openPorts })
+//     portsAreScanning = false
+//     return openPorts
+// }
 
 // scanPorts(8000, 9000).then((openPorts) => {
 // 	console.log('Open ports:', openPorts);
@@ -266,10 +274,6 @@ async function scanPorts(portsToScan: number[]) {
 
 // The path you're trying to reach doesn't exist on the server. The server is running, but there's no content at the specific path you're requesting. This can be the case if there's a typo in your path, or if you're requesting a path that hasn't been defined in your server's routing rules stackoverflow.com.
 // The server is not setup to respond to the type of request you're making. For example, you might be making a GET request to a path that only responds to POST requests.
-
-// port ranges: 0 - 1_024 - 65_536
-// The range 0-1023 is reserved by TCP/IP for the "well-known ports", the ones commonly used by system and network services
-// https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
 
 ipcMain.handle('scan-ports-progress', (event, percentComplete) => {
     return percentComplete
@@ -390,4 +394,85 @@ function maybeParseUrl(value: string): URL | undefined {
     }
 
     return undefined
+}
+
+const scanPortFactory = {
+    create: function () {
+        return new Promise((resolve, reject) => {
+            resolve(scanPort)
+        })
+    },
+    destroy: function (scanPort) {
+        return new Promise((resolve) => {
+            resolve()
+        })
+    },
+}
+
+const opts = { max: 5 } // Adjust these numbers based on your system's capabilities
+const scanPortPool = genericPool.createPool(scanPortFactory, opts)
+
+async function scanPorts(portsToScan) {
+    const openPorts = []
+    const totalPorts = portsToScan.length
+
+    if (portsAreScanning) {
+        console.log('Ports are already scanning!')
+        throw new Error('Ports are already scanning!')
+    }
+
+    portsAreScanning = true
+    shouldContinueScanning = true
+
+    let index = 0
+    for (const port of portsToScan) {
+        index++
+        if (!shouldContinueScanning) {
+            console.log('Scanning stopped.')
+            break
+        }
+
+        let scanPortInstance
+        let retries = 0
+        const maxRetries = 5 // Adjust this based on your needs
+
+        while (!scanPortInstance && retries < maxRetries) {
+            try {
+                scanPortInstance = await scanPortPool.acquire()
+            } catch (error) {
+                console.log('All workers are busy. Retrying in 1 second...')
+                await new Promise((resolve) => setTimeout(resolve, 1000)) // Wait for 1 second
+                retries++
+            }
+        }
+
+        if (!scanPortInstance) {
+            console.log(
+                `Failed to acquire a worker after ${maxRetries} retries. Skipping port ${port}.`
+            )
+            continue
+        }
+
+        const response = await scanPortInstance(port)
+        scanPortPool.release(scanPortInstance)
+
+        if (response) {
+            openPorts.push({
+                port,
+                statusCode: response?.statusCode,
+                statusMessage: response?.statusMessage,
+                headers: response?.headers,
+                error: response?.error,
+            })
+        }
+
+        const percentComplete = (index / totalPorts) * 100
+        console.log({ index }, { totalPorts })
+        mainWindow?.webContents.send('scan-ports-progress', percentComplete)
+    }
+
+    console.log({ portsToScan })
+    console.log({ openPorts })
+    portsAreScanning = false
+    return openPorts
 }
