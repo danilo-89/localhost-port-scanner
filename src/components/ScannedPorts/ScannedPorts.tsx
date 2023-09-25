@@ -21,12 +21,16 @@ import { usePortsForScanningContext } from '@/context/PortsForScanningContext'
 import { useScannedPortsContext } from '@/context/ScannedPortsContext'
 // import * as Checkbox from '@radix-ui/react-checkbox';
 import detectiveImg from '@/assets/detective.png'
+import detectiveReadyImg from '@/assets/detective-ready.png'
 import LoaderDots from '../LoaderDots'
 import Button from '../common/Button'
 import SvgInfoCircle from '../icons/SvgInfoCircle'
 import Modal from '../common/Modal'
 import ScannedPortInfo from '../ScannedPortInfo'
 import { useSelectedPortContext } from '@/context/SelectedPortContext'
+import SvgChevronDoubleLeft from '../icons/SvgChevronDoubleLeft'
+import SvgChevronLeft from '../icons/SvgChevronLeft'
+import { SvgCog8Solid } from '../icons'
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
     // Rank the item
@@ -88,6 +92,7 @@ const columnHelper = createColumnHelper<Port>()
 
 const ScannedPorts = () => {
     const { state } = useScannedPortsContext()
+    const { portsForScanning } = usePortsForScanningContext()
     const [sorting, setSorting] = useState<any>([])
     const [globalFilter, setGlobalFilter] = useState('')
     const [rowSelection, setRowSelection] = useState({})
@@ -170,6 +175,12 @@ const ScannedPorts = () => {
             globalFilter,
             rowSelection,
         },
+        initialState: {
+            pagination: {
+                pageSize: 50,
+                pageIndex: 0,
+            },
+        },
         enableRowSelection: true,
         enableMultiRowSelection: false,
         onRowSelectionChange: setRowSelection,
@@ -190,10 +201,13 @@ const ScannedPorts = () => {
 
     if (state.isLoading)
         return (
-            <div className="flex h-[calc(100vh-19em)] max-h-[32rem] min-h-[22rem]">
+            <div
+                key="detective-searching"
+                className="flex h-[calc(100vh-19em)] max-h-[32rem] min-h-[22rem]"
+            >
                 <figure className="relative m-auto text-center text-manatee">
                     <img
-                        className="m-auto mb-2 w-[29rem] max-w-[90%]"
+                        className="m-auto mb-2 w-[29rem]"
                         src={detectiveImg}
                         alt="detective with magnifying glass illustration"
                         width={464}
@@ -206,6 +220,43 @@ const ScannedPorts = () => {
                 </figure>
             </div>
         )
+
+    if (!state.data?.length && state.percentOfScanning === undefined) {
+        return (
+            <div
+                key="detective-ready"
+                className="flex h-[calc(100vh-19em)] max-h-[32rem] min-h-[22rem]"
+            >
+                <figure className="relative m-auto text-center text-manatee">
+                    <img
+                        className="m-auto mb-2 w-[22rem]"
+                        src={detectiveReadyImg}
+                        alt="detective with magnifying glass illustration"
+                        width={352}
+                        height={'auto'}
+                    />
+                    <figcaption className="speech-bubble absolute right-[1.5rem] top-[-1rem] translate-x-full rounded-lg px-6 py-3 font-semibold text-manatee">
+                        {portsForScanning?.length ? (
+                            <>
+                                Modify selected ports{' '}
+                                <SvgCog8Solid className="inline-block h-6 w-6 pb-[0.1rem] text-lotion" />
+                                <br />
+                                or just hit SCAN to begin now.
+                            </>
+                        ) : (
+                            <>
+                                Pick the ports{' '}
+                                <SvgCog8Solid className="inline-block h-6 w-6 pb-[0.1rem] text-lotion" />
+                                ,
+                                <br />
+                                then just hit SCAN to begin.
+                            </>
+                        )}
+                    </figcaption>
+                </figure>
+            </div>
+        )
+    }
 
     return (
         <div>
@@ -230,10 +281,132 @@ const ScannedPorts = () => {
                                         onChange={(value) =>
                                             setGlobalFilter(String(value))
                                         }
-                                        className="ml-auto px-2 py-1 text-sm font-normal"
+                                        className="mr-auto px-2 py-1 text-sm font-normal"
                                         placeholder="Search all columns..."
                                         type="search"
                                     />
+                                    {/* <div className="mx-auto">
+                                        <label htmlFor="includeClosed">
+                                            <input
+                                                type="checkbox"
+                                                name=""
+                                                id="includeClosed"
+                                            />
+                                            show closed ports
+                                        </label>
+                                    </div> */}
+                                    <div className="flex items-center gap-2">
+                                        <div className="mr-5 flex gap-2">
+                                            <Button
+                                                onClick={() =>
+                                                    table.setPageIndex(0)
+                                                }
+                                                disabled={
+                                                    !table.getCanPreviousPage()
+                                                }
+                                                variation="transparent"
+                                                size="sm"
+                                                className="h-9 w-9 py-2"
+                                            >
+                                                <SvgChevronDoubleLeft />
+                                            </Button>
+                                            <Button
+                                                onClick={() =>
+                                                    table.previousPage()
+                                                }
+                                                disabled={
+                                                    !table.getCanPreviousPage()
+                                                }
+                                                variation="transparent"
+                                                size="sm"
+                                                className="h-9 w-9 py-2"
+                                            >
+                                                <SvgChevronLeft />
+                                            </Button>
+                                            <span className="flex items-center gap-1 font-medium">
+                                                <input
+                                                    type="number"
+                                                    value={
+                                                        table.getState()
+                                                            .pagination
+                                                            .pageIndex + 1
+                                                    }
+                                                    onChange={(e) => {
+                                                        const pageCount =
+                                                            table.getPageCount()
+                                                        const page = e.target
+                                                            .value
+                                                            ? Number(
+                                                                  e.target.value
+                                                              ) - 1
+                                                            : 0
+                                                        table.setPageIndex(
+                                                            page >= pageCount
+                                                                ? pageCount - 1
+                                                                : page
+                                                        )
+                                                    }}
+                                                    className="h-9 w-16 rounded border p-1"
+                                                />
+                                                <span>
+                                                    of {table.getPageCount()}
+                                                </span>
+                                            </span>
+
+                                            <Button
+                                                onClick={() => table.nextPage()}
+                                                disabled={
+                                                    !table.getCanNextPage()
+                                                }
+                                                variation="transparent"
+                                                size="sm"
+                                                className="h-9 w-9 py-2"
+                                            >
+                                                <SvgChevronLeft flip={true} />
+                                            </Button>
+                                            <Button
+                                                onClick={() =>
+                                                    table.setPageIndex(
+                                                        table.getPageCount() - 1
+                                                    )
+                                                }
+                                                disabled={
+                                                    !table.getCanNextPage()
+                                                }
+                                                variation="transparent"
+                                                size="sm"
+                                                className="h-9 w-9 py-2"
+                                            >
+                                                <SvgChevronDoubleLeft
+                                                    flip={true}
+                                                />
+                                            </Button>
+                                        </div>
+
+                                        <select
+                                            className="h-9 px-2 py-1"
+                                            value={
+                                                table.getState().pagination
+                                                    .pageSize
+                                            }
+                                            onChange={(e) => {
+                                                table.setPageSize(
+                                                    Number(e.target.value)
+                                                )
+                                            }}
+                                        >
+                                            {[10, 20, 30, 40, 50, 100].map(
+                                                (pageSize) => (
+                                                    <option
+                                                        key={pageSize}
+                                                        value={pageSize}
+                                                    >
+                                                        Show {pageSize}
+                                                    </option>
+                                                )
+                                            )}
+                                        </select>
+                                    </div>
                                 </div>
                             </th>
                         </tr>
@@ -326,86 +499,17 @@ const ScannedPorts = () => {
                             })}
                     </tbody>
                 </table>
-                <hr />
-                <div>{table.getRowModel().rows.length} Rows</div>
+                {/* <hr />
+                <div>{table.getRowModel().rows.length} Rows</div> */}
                 {/* <div>
     <button onClick={() => rerender()}>Force Rerender</button>
   </div>
   <div>
     <button onClick={() => refreshData()}>Refresh Data</button>
   </div> */}
-                <hr />
-                <div className="flex items-center gap-2">
-                    <button
-                        className="rounded border p-1"
-                        onClick={() => table.setPageIndex(0)}
-                        disabled={!table.getCanPreviousPage()}
-                    >
-                        {'<<'}
-                    </button>
-                    <button
-                        className="rounded border p-1"
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                    >
-                        {'<'}
-                    </button>
-                    <button
-                        className="rounded border p-1"
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                    >
-                        {'>'}
-                    </button>
-                    <button
-                        className="rounded border p-1"
-                        onClick={() =>
-                            table.setPageIndex(table.getPageCount() - 1)
-                        }
-                        disabled={!table.getCanNextPage()}
-                    >
-                        {'>>'}
-                    </button>
-                    <span className="flex items-center gap-1">
-                        <div>Page</div>
-                        <strong>
-                            {table.getState().pagination.pageIndex + 1} of{' '}
-                            {table.getPageCount()}
-                        </strong>
-                    </span>
-                    <span className="flex items-center gap-1">
-                        | Go to page:
-                        <input
-                            type="number"
-                            defaultValue={
-                                table.getState().pagination.pageIndex + 1
-                            }
-                            onChange={(e) => {
-                                const page = e.target.value
-                                    ? Number(e.target.value) - 1
-                                    : 0
-                                table.setPageIndex(page)
-                            }}
-                            className="w-16 rounded border p-1"
-                        />
-                    </span>
-                    <select
-                        value={table.getState().pagination.pageSize}
-                        onChange={(e) => {
-                            table.setPageSize(Number(e.target.value))
-                        }}
-                    >
-                        {[10, 20, 30, 40, 50].map((pageSize) => (
-                            <option
-                                key={pageSize}
-                                value={pageSize}
-                            >
-                                Show {pageSize}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <pre>{JSON.stringify(sorting, null, 2)}</pre>
+                {/* <hr />
+
+                <pre>{JSON.stringify(sorting, null, 2)}</pre> */}
             </div>
         </div>
     )
