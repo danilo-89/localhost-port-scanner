@@ -25,7 +25,7 @@ const Home = () => {
                     <Controls />
                     <ScannedPorts />
                 </div>
-                <div>
+                {/* <div>
                     <button
                         type="button"
                         onClick={() => {
@@ -50,7 +50,7 @@ const Home = () => {
                     >
                         Scan Port
                     </button>
-                </div>
+                </div> */}
             </div>
 
             <Footer />
