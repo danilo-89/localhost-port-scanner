@@ -12,6 +12,8 @@ export const getStatusMessageInfo = (statusMessage: string | undefined) => {
             return portStatusMessages.ADDRESS_INVALID
         case 'Invalid URL':
             return portStatusMessages.INVALID_URL
+        case 'CONNECTION REFUSED':
+            return portStatusMessages.CONNECTION_REFUSED
         default:
             return portStatusMessages.UNDEFINED
     }
