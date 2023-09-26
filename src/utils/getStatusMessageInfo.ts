@@ -1,4 +1,4 @@
-import { portStatusMessages } from '@/constants/portStatusMessages'
+import { portStatusMessages } from '../constants/portStatusMessages'
 
 export const getStatusMessageInfo = (statusMessage: string | undefined) => {
     switch (statusMessage) {
