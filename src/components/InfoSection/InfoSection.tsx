@@ -6,6 +6,7 @@ import { useScannedPortsContext } from '@/context/ScannedPortsContext'
 import SvgCog8Solid from '../icons/SvgCog8Solid'
 import Button from '../common/Button'
 import clsx from 'clsx'
+import { useSelectedPortContext } from '@/context/SelectedPortContext'
 
 const scanFinished = <span className="text-[#77D48D]">Scanning finished!</span>
 const scanStopped = (
@@ -39,6 +40,7 @@ const InfoSection = () => {
     const { state, portsForScanning } = usePortsForScanningContext()
     const [showSettings, setShowSettings] = useState(false)
     const { state: scanningResult } = useScannedPortsContext()
+    const { killPortResult } = useSelectedPortContext()
 
     const isValidPercent = typeof scanningResult.percentOfScanning === 'number'
 
@@ -49,25 +51,42 @@ const InfoSection = () => {
                     <div className="mb-2 text-manatee">
                         Total ports for scanning:{' '}
                         <span>
-                            {portsForScanning.length
-                                ? null
-                                : '0 - select ports for scanning'}
+                            {portsForScanning.length ||
+                                '0 - select ports for scanning'}
                         </span>
                     </div>
                     <div className="text-xl">
-                        {getScanningStatus(
-                            scanningResult.isLoading,
-                            isValidPercent,
-                            scanningResult.percentOfScanning
-                        )}{' '}
-                        <span className="font-bold">
-                            {scanningResult.percentOfScanning &&
-                            scanningResult.percentOfScanning !== 100
-                                ? `${scanningResult.percentOfScanning.toFixed(
-                                      2
-                                  )}%`
-                                : null}
-                        </span>
+                        {killPortResult ? (
+                            <div>
+                                {killPortResult.success ? (
+                                    <span className="text-[#bc6cdc]">
+                                        Port {killPortResult.port} killed
+                                        successfully.
+                                    </span>
+                                ) : (
+                                    <span className="text-[#f24f4f]">
+                                        {killPortResult.errorMessage}
+                                    </span>
+                                )}
+                            </div>
+                        ) : (
+                            <>
+                                {' '}
+                                {getScanningStatus(
+                                    scanningResult.isLoading,
+                                    isValidPercent,
+                                    scanningResult.percentOfScanning
+                                )}{' '}
+                                <span className="font-bold">
+                                    {scanningResult.percentOfScanning &&
+                                    scanningResult.percentOfScanning !== 100
+                                        ? `${scanningResult.percentOfScanning.toFixed(
+                                              2
+                                          )}%`
+                                        : null}
+                                </span>
+                            </>
+                        )}
                     </div>
                     <div>
                         {/* <div>isLoading: {scanningResult.isLoading ? 'true' : 'false'}</div> */}
