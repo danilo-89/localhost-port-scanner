@@ -181,6 +181,7 @@ function scanPort(port: number) {
 }
 
 let portsAreScanning = false
+let isPortKilling = false
 let shouldContinueScanning = true
 
 // async function scanPorts(portsToScan: number[]) {
@@ -344,12 +345,26 @@ ipcMain.handle('get-ip', () => {
 })
 
 async function killPort(port: number) {
-    console.log({ port })
+    mainWindow?.webContents.send('scan-ports-progress', isPortKilling)
     try {
+        if (isPortKilling) {
+            throw new Error('Another kill-port process is already in progress.')
+        }
+
+        isPortKilling = true
+
+        if (port < 1024) {
+            throw new Error(
+                'Well-known ports (0 - 1023) are not allowed to be killed.'
+            )
+        }
         return await kill(port)
+        // eslint-disable-next-line no-useless-catch
     } catch (error) {
-        console.log(error)
-        return false
+        throw error
+    } finally {
+        isPortKilling = false
+        mainWindow?.webContents.send('scan-ports-progress', isPortKilling)
     }
 }
 
