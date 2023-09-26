@@ -1,41 +1,17 @@
-import {
-    app,
-    BrowserWindow,
-    ClientRequest,
-    ipcMain,
-    net,
-    shell,
-} from 'electron'
+import { app, BrowserWindow, ipcMain, net, shell } from 'electron'
 import path from 'path'
 import os from 'os'
 import express from 'express'
 import { Server, IncomingMessage, ServerResponse } from 'http'
 import range from 'lodash.range'
-import { ScanPortResponse } from './types/types'
 import kill from 'kill-port'
 import genericPool from 'generic-pool'
 
-// Error: net::ERR_CONNECTION_REFUSED
-// ERR_ADDRESS_INVALID - port 0
-// ERR_UNSAFE_PORT - port 1
+// Utilities
+import { parseError } from './utils'
 
-const parseError = (errorValue: string) => {
-    if (errorValue.startsWith('net::ERR_')) {
-        return errorValue.slice(9).replaceAll('_', ' ')
-    }
-
-    return errorValue
-    // switch (errorValue) {
-    //     case 'net::ERR_ADDRESS_INVALID':
-    //         return 'Address Invalid'
-    //     case 'net::ERR_UNSAFE_PORT':
-    //         return 'Unsafe Port'
-    //     case 'net::ERR_INVALID_HTTP_RESPONSE':
-    //         return 'Invalid Http Response'
-    //     default:
-    //         return errorValue
-    // }
-}
+// Types
+import { ScanPortResponse } from './types/types'
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -104,6 +80,39 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+
+// Intercept a click on anchor (ideally with `target="_blank"`)
+// This replaces 'new-window' event which is being deprecated
+async function handleUrl(url: string) {
+    const parsedUrl = maybeParseUrl(url)
+    if (!parsedUrl) {
+        return
+    }
+
+    const { protocol } = parsedUrl
+    // We could handle all possible link cases here, not only http/https
+    if (protocol === 'http:' || protocol === 'https:') {
+        try {
+            await shell.openExternal(url)
+        } catch (error: unknown) {
+            console.error(`Failed to open url: ${error}`)
+        }
+    }
+}
+
+function maybeParseUrl(value: string): URL | undefined {
+    if (typeof value === 'string') {
+        try {
+            return new URL(value)
+        } catch (err) {
+            // Errors are ignored, as we only want to check if the value is a valid url
+            console.error(`Failed to parse url: ${value}`)
+        }
+    }
+
+    return undefined
+}
+
 let server: Server<typeof IncomingMessage, typeof ServerResponse>
 
 ipcMain.handle('start-server', () => {
@@ -122,6 +131,7 @@ ipcMain.handle('start-server', () => {
     return 'Server started'
 })
 
+// SCAN PORT functionality
 function scanPort(port: number) {
     return new Promise((resolve, reject) => {
         try {
@@ -139,8 +149,8 @@ function scanPort(port: number) {
                 resolve(response)
             })
             request.on('error', (error) => {
-                console.log('error occured', port)
-                console.log('error occured')
+                console.log('error occurred', port)
+                console.log('error occurred')
                 // If the request failed, the port is maybe closed
                 console.log(error)
                 console.log(error.message)
@@ -150,7 +160,7 @@ function scanPort(port: number) {
                     // resolve(false)
                     resolve({
                         port: port,
-                        statusMessage: parseError(error.message),
+                        statusMessage: parseError(error?.message),
                         statusCode: undefined,
                         error: true,
                         headers: {},
@@ -158,7 +168,7 @@ function scanPort(port: number) {
                 } else {
                     resolve({
                         port: port,
-                        statusMessage: parseError(error.message),
+                        statusMessage: parseError(error?.message),
                         statusCode: undefined,
                         error: true,
                         headers: {},
@@ -169,19 +179,18 @@ function scanPort(port: number) {
         } catch (error) {
             resolve({
                 port: port,
-                statusMessage: parseError(error.message),
+                statusMessage: parseError(error?.message),
                 statusCode: undefined,
                 error: true,
                 headers: {},
             })
-            console.log('cauth')
+            console.log('caught')
             console.log(error)
         }
     })
 }
 
 let portsAreScanning = false
-let isPortKilling = false
 let shouldContinueScanning = true
 
 // async function scanPorts(portsToScan: number[]) {
@@ -270,156 +279,15 @@ let shouldContinueScanning = true
 // 	console.log('Open ports:', openPorts);
 // });
 
-// 404 error when getting port
-// This can happen for a number of reasons, such as:
-
-// The path you're trying to reach doesn't exist on the server. The server is running, but there's no content at the specific path you're requesting. This can be the case if there's a typo in your path, or if you're requesting a path that hasn't been defined in your server's routing rules stackoverflow.com.
-// The server is not setup to respond to the type of request you're making. For example, you might be making a GET request to a path that only responds to POST requests.
-
-ipcMain.handle('scan-ports-progress', (event, percentComplete) => {
-    return percentComplete
-})
-
-ipcMain.handle('stop-server', () => {
-    if (server) {
-        server.close(() => {
-            console.log('Server stopped')
-        })
-        server = null
-    }
-
-    return 'Server stopped'
-})
-
-ipcMain.handle('scan-port', async () => {
-    // Error: net::ERR_CONNECTION_REFUSED
-    // ERR_ADDRESS_INVALID - port 0
-    // ERR_UNSAFE_PORT - port 1
-    return await scanPort(11)
-})
-
-const parsePortsForScaning = (portsArray: (number | number[])[]) => {
-    return [].concat(
-        ...portsArray.map((item) => {
-            if (
-                Array.isArray(item) &&
-                item.length === 2 &&
-                typeof item[0] === 'number' &&
-                typeof item[1] === 'number'
-            ) {
-                return range(item[0], item[1])
-            }
-            return item
-        })
-    )
-}
-
-ipcMain.handle('scan-ports', async (event, portsArray) => {
-    return await scanPorts(parsePortsForScaning(portsArray))
-})
-
-ipcMain.handle('stop-scanning', () => {
-    shouldContinueScanning = false
-    return 'Scanning will stop.'
-})
-
-function getLocalhostAddress() {
-    const networkInterfaces = os.networkInterfaces()
-    const addresses: string[] = []
-
-    // Loop through network interfaces to find the IPv4 addresses
-    Object.keys(networkInterfaces).forEach((iface) => {
-        networkInterfaces[iface].forEach((details) => {
-            if (details.family === 'IPv4' && !details.internal) {
-                addresses.push(details.address)
-            }
-        })
-    })
-
-    console.log(addresses)
-    return addresses.join(', ')
-}
-
-ipcMain.handle('get-ip', () => {
-    return getLocalhostAddress()
-})
-
-async function killPort(port: number) {
-    mainWindow?.webContents.send('scan-ports-progress', isPortKilling)
-    try {
-        if (isPortKilling) {
-            throw new Error('Another kill-port process is already in progress.')
-        }
-
-        isPortKilling = true
-
-        if (port < 1024) {
-            throw new Error(
-                'Well-known ports (0 - 1023) are not allowed to be killed.'
-            )
-        }
-        return await kill(port)
-        // eslint-disable-next-line no-useless-catch
-    } catch (error) {
-        throw error
-    } finally {
-        isPortKilling = false
-        mainWindow?.webContents.send('scan-ports-progress', isPortKilling)
-    }
-}
-
-ipcMain.handle('kill-port', (event, port: number) => {
-    return killPort(port)
-})
-
-// const kill = require('kill-port')
-
-// kill(port, 'tcp')
-//   .then(console.log)
-//   .catch(console.log)
-
-// Intercept a click on anchor (ideally with `target="_blank"`)
-// This replaces 'new-window' event which is being deprecated
-
-async function handleUrl(url: string) {
-    const parsedUrl = maybeParseUrl(url)
-    if (!parsedUrl) {
-        return
-    }
-
-    const { protocol } = parsedUrl
-    // We could handle all possible link cases here, not only http/https
-    if (protocol === 'http:' || protocol === 'https:') {
-        try {
-            await shell.openExternal(url)
-        } catch (error: unknown) {
-            console.error(`Failed to open url: ${error}`)
-        }
-    }
-}
-
-function maybeParseUrl(value: string): URL | undefined {
-    if (typeof value === 'string') {
-        try {
-            return new URL(value)
-        } catch (err) {
-            // Errors are ignored, as we only want to check if the value is a valid url
-            console.error(`Failed to parse url: ${value}`)
-        }
-    }
-
-    return undefined
-}
-
 const scanPortFactory = {
     create: function () {
         return new Promise((resolve, reject) => {
             resolve(scanPort)
         })
     },
-    destroy: function (scanPort) {
+    destroy: function (scanPort: any) {
         return new Promise((resolve) => {
-            resolve()
+            resolve(false)
         })
     },
 }
@@ -491,3 +359,86 @@ async function scanPorts(portsToScan) {
     portsAreScanning = false
     return openPorts
 }
+
+// KILL PORT functionality
+let isPortKilling = false
+
+async function killPort(port: number) {
+    try {
+        // disallow running new kill-port process is one is already in progress
+        if (isPortKilling) {
+            throw new Error('Another kill-port process is already in progress.')
+        }
+
+        isPortKilling = true
+
+        // disallow killing ports in specific range
+        if (port < 1024) {
+            throw new Error(
+                'Well-known ports (0 - 1023) are not allowed to be killed.'
+            )
+        }
+
+        return await kill(port)
+
+        // eslint-disable-next-line no-useless-catch
+    } catch (error) {
+        throw error
+    } finally {
+        isPortKilling = false
+    }
+}
+
+// GET LOCALHOST IP ADDRESS functionality
+function getLocalhostAddress() {
+    const networkInterfaces = os.networkInterfaces()
+    const addresses: string[] = []
+
+    // Loop through network interfaces to find the IPv4 addresses
+    Object.keys(networkInterfaces).forEach((iface) => {
+        networkInterfaces[iface].forEach((details) => {
+            if (details.family === 'IPv4' && !details.internal) {
+                addresses.push(details.address)
+            }
+        })
+    })
+
+    return addresses.join(', ')
+}
+
+// HANDLERS
+ipcMain.handle('kill-port', (event, port: number) => {
+    return killPort(port)
+})
+
+ipcMain.handle('scan-ports-progress', (event, percentComplete) => {
+    return percentComplete
+})
+
+ipcMain.handle('stop-server', () => {
+    if (server) {
+        server.close(() => {
+            console.log('Server stopped')
+        })
+        server = null
+    }
+
+    return 'Server stopped'
+})
+
+ipcMain.handle('scan-port', async () => {
+    return await scanPort(11)
+})
+
+ipcMain.handle('scan-ports', async (event, portsArray) => {
+    return await scanPorts(portsArray)
+})
+
+ipcMain.handle('stop-scanning', () => {
+    shouldContinueScanning = false
+    return 'Scanning will stop.'
+})
+
+ipcMain.handle('get-ip', () => {
+    return getLocalhostAddress()
+})

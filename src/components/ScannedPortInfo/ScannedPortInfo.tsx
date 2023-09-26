@@ -1,12 +1,14 @@
 import clsx from 'clsx'
 
+// Constants
+import { PORT_RANGE_MESSAGES_SOURCE } from '@/constants/portRangeMessages'
+
 // Configs
 import { scannedPortInfoConfig } from './scannedPortInfoConfig'
 
 // Utilities
 import { getStatusMessageInfo } from '@/utils/getStatusMessageInfo'
 import { getPortRangeMessage } from '@/utils/getPortRangeMessage'
-import { PORT_RANGE_MESSAGES_SOURCE } from '@/constants/portRangeMessages'
 
 // TS
 interface IProps {
