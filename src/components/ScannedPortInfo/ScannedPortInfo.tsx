@@ -19,7 +19,7 @@ const ScannedPortInfo = ({ clickedRowInfo }: IProps) => {
     return (
         <div className="mx-auto w-[35rem] bg-yankeesBlue">
             <div className="mb-4 bg-darkGunmetal p-4">
-                <h2 className="mb-2 text-lg font-bold">
+                <h2 className="mb-3 text-lg font-bold">
                     <span className="rounded-md bg-charcoal px-2">
                         {clickedRowInfo.port}
                     </span>{' '}
