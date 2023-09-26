@@ -52,6 +52,7 @@
         "vite-plugin-eslint": "^1.8.1"
     },
     "dependencies": {
+        "@hookform/resolvers": "^3.3.1",
         "@radix-ui/react-checkbox": "^1.0.4",
         "@radix-ui/react-dialog": "^1.0.4",
         "@tanstack/match-sorter-utils": "^8.8.4",
@@ -67,6 +68,7 @@
         "lodash.sorteduniq": "^4.2.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
+        "react-hook-form": "^7.46.2",
         "tailwind-merge": "^1.14.0",
         "zod": "^3.22.2"
     }
