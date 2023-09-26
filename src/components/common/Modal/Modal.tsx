@@ -29,7 +29,7 @@ const Modal = ({ children, preventOverlayClose, setIsOpen }: IProps) => {
                             variation="transparent"
                             hasBorder={false}
                             size="sm"
-                            className="absolute right-2 top-2.5 h-10 w-10"
+                            className="absolute right-2 top-2.5 h-10 w-10 text-manatee"
                             onClick={() => setIsOpen(false)}
                         >
                             x
