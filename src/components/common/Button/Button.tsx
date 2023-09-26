@@ -1,5 +1,7 @@
-import { cn } from '@/utils'
 import { ButtonHTMLAttributes, ReactNode } from 'react'
+
+// Utilities
+import { cn } from '@/utils'
 
 // TS
 interface IProps extends ButtonHTMLAttributes<HTMLButtonElement> {
