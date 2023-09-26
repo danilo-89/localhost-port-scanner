@@ -6,9 +6,39 @@ import { useSelectedPortContext } from '@/context/SelectedPortContext'
 const Controls = () => {
     const { state, dispatch, portsForScanning } = usePortsForScanningContext()
     const { state: scanningResult, scanPorts } = useScannedPortsContext()
-    const { selectedPort } = useSelectedPortContext()
+    const {
+        selectedPort,
+        setKillPortResult,
+        killPortResult,
+        isPortKilling,
+        setIsPortKilling,
+    } = useSelectedPortContext()
 
     console.log({ selectedPort })
+    console.log({ killPortResult })
+
+    const killPortHandler = async () => {
+        setIsPortKilling(true)
+        setKillPortResult(null)
+        try {
+            await window.electronAPI.killPort(selectedPort?.port)
+            setKillPortResult({
+                port: selectedPort?.port,
+                success: true,
+            })
+        } catch (error) {
+            setKillPortResult({
+                port: selectedPort?.port,
+                errorMessage: error?.message?.replace(
+                    "Error invoking remote method 'kill-port': ",
+                    ''
+                ),
+                error: true,
+            })
+        } finally {
+            setIsPortKilling(false)
+        }
+    }
 
     return (
         <>
@@ -17,9 +47,12 @@ const Controls = () => {
                     type="button"
                     className="w-[30%]"
                     disabled={
-                        scanningResult.isLoading || !portsForScanning.length
+                        scanningResult.isLoading ||
+                        !portsForScanning.length ||
+                        isPortKilling
                     }
                     onClick={() => {
+                        setKillPortResult(null)
                         scanPorts(portsForScanning)
                     }}
                 >
@@ -40,15 +73,12 @@ const Controls = () => {
                     type="button"
                     className="w-[30%]"
                     variation="secondary"
-                    disabled={!selectedPort}
-                    onClick={async () =>
-                        console.log(
-                            // selectedPort?.port
-                            await window.electronAPI.killPort(
-                                selectedPort?.port
-                            )
-                        )
+                    disabled={
+                        !selectedPort ||
+                        isPortKilling ||
+                        scanningResult.isLoading
                     }
+                    onClick={() => killPortHandler()}
                 >
                     KILL
                 </Button>
