@@ -26,3 +26,10 @@ export interface ScanPortResponse {
     error: undefined | true
     headers: HeadersReceivedResponse
 }
+
+export interface KillPortResult {
+    port: number | undefined
+    success?: true
+    error?: true
+    errorMessage?: string
+}
