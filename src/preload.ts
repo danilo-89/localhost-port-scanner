@@ -3,6 +3,9 @@
 
 import { IpcRendererEvent, contextBridge, ipcRenderer } from 'electron'
 
+// Utilities
+import { getStorageItem, setStorageItem } from './utils'
+
 contextBridge.exposeInMainWorld('electronAPI', {
     startServer: () => {
         ipcRenderer.invoke('start-server')
@@ -49,4 +52,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
     killPort: async (port: number) => {
         return await ipcRenderer.invoke('kill-port', port)
     },
+})
+
+// SHOW REMINDER functionality
+const getReminderShown = () => {
+    return getStorageItem('reminderShown')
+}
+
+// get localstorage value and send it to main
+ipcRenderer.send('get-localstorage-reminderShown', getReminderShown())
+
+// save localstorage value if correct value returned in listener
+ipcRenderer.on('set-localstorage-reminderShown', (event, value) => {
+    if (value === true) {
+        setStorageItem('reminderShown', 'true')
+    }
+    ipcRenderer.removeAllListeners('scan-ports-progress')
 })
