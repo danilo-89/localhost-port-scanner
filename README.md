@@ -1,4 +1,4 @@
-## <img src="./readme/icon.png" width="15" height="15" /> Localhost Port Scanner
+## <img src="./readme/icon.png" width="18" height="18" /> Localhost Port Scanner
 
 The 'Localhost Port Scanner' is a network utility tool developed with Electron. It is designed to assist users in scanning a custom range of network ports, checking their status, and optionally terminating processes associated with specific ports.
 
