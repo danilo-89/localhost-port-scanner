@@ -8,7 +8,11 @@ import {
 } from 'react'
 
 // Utilities
-import { parsePortsForScanning } from '@/utils'
+import {
+    parsePortsForScanning,
+    setStorageItem,
+    getInitialPortsForScanning,
+} from '@/utils'
 
 type StateItem = number | [number, number]
 
@@ -51,19 +55,14 @@ export function PortsForScanningProvider({
 }: {
     children: ReactNode
 }) {
-    const [state, dispatch] = useReducer(reducer, [
-        1,
-        [3_000, 11_000],
-        // [50_000, 65_535],
-        9999999999999,
-        7000,
-        3001,
-        // [1000, 3000],
-    ])
+    const [state, dispatch] = useReducer(reducer, [], () =>
+        getInitialPortsForScanning()
+    )
 
     const [portsForScanning, setPortsForScanning] = useState([])
 
     useEffect(() => {
+        setStorageItem('portsForScanning', JSON.stringify(state))
         const parsedPorts = parsePortsForScanning(state)
 
         setPortsForScanning(() => parsedPorts)
