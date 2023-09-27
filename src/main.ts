@@ -69,11 +69,13 @@ async function showMessageBox() {
     const dialogInstance = await dialog.showMessageBox(mainWindow, {
         title: 'Reminder',
         message: DISCLAIMER,
-        buttons: ['I UNDERSTAND'],
+        buttons: ['QUIT', 'I UNDERSTAND'],
     })
 
-    if (dialogInstance.response === 0) {
+    if (dialogInstance.response === 1) {
         mainWindow?.webContents.send('set-localstorage-reminderShown', true)
+    } else {
+        app.quit()
     }
 }
 
