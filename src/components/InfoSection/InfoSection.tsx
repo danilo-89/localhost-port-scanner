@@ -36,6 +36,7 @@ const InfoSection = () => {
                     onClick={() => setShowSettings(true)}
                     className="ml-auto"
                     variation="transparent"
+                    disabled={scanningResult.isLoading}
                 >
                     <SvgCog8Solid />
                 </Button>
