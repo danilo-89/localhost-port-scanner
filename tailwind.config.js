@@ -36,6 +36,7 @@ module.exports = {
             manatee: '#9DA3AE',
             santasGray: '#939aaf',
             shinyShamrock: '#49A078',
+            americanViolet: '#521687',
             lavenderIndigo: '#9052F2',
             chineseBlue: '#3C588E',
             nickel: '#656c7a',
