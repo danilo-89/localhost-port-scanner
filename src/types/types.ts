@@ -1,10 +1,10 @@
 import { HeadersReceivedResponse } from 'electron'
 
 export interface ScannedPortsState {
-    data: null | any
+    data: null | ScanPortResponse[]
     isLoading: boolean
     percentOfScanning: undefined | number
-    error: null | any
+    error: null | { name?: string }
 }
 
 export type ScannedPortsDispatch = (arg1: Partial<ScannedPortsState>) => void
@@ -23,7 +23,7 @@ export interface ScanPortResponse {
     port: number
     statusMessage: undefined | string
     statusCode: undefined | number
-    error: undefined | true
+    error?: undefined | true
     headers: HeadersReceivedResponse
 }
 

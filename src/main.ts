@@ -267,7 +267,7 @@ async function scanPorts(portsToScan: number[]) {
 // KILL PORT functionality
 let isPortKilling = false
 
-async function killPort(port: number) {
+async function killPort(port: number): Promise<false | ScanPortResponse[]> {
     try {
         // disallow running new kill-port process is one is already in progress
         if (isPortKilling) {

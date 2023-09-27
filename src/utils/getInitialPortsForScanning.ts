@@ -1,5 +1,7 @@
-import { getStorageItem } from './storage'
 import { z } from 'zod'
+
+// Utilities
+import { getStorageItem } from './storage'
 
 const portItemSchema = z.number().int().min(0).max(65535)
 
@@ -17,6 +19,7 @@ const storedPortsForScanningSchema = z.array(
 const defaultPortsForScanning = [
     [1, 10],
     2001,
+    999999999,
     [3_000, 11_000],
     // [50_000, 65_535],
     // [1000, 3000],

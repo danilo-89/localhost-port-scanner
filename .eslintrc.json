@@ -6,6 +6,9 @@
                 "extensions": [".ts", ".tsx", ".js", ".jsx", ".json"]
             },
             "typescript": {}
+        },
+        "react": {
+            "version": "detect"
         }
     },
     "overrides": [
