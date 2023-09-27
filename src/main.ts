@@ -308,14 +308,18 @@ const scanPortFactory = {
             resolve(scanPort)
         })
     },
-    destroy: function (scanPort: () => Promise<unknown>): Promise<void> {
+    destroy: function (
+        scanPort: () => Promise<unknown>
+    ): Promise<void | boolean> {
         return new Promise((resolve) => {
-            resolve()
+            resolve(false)
         })
     },
 }
 
 const opts = { max: 5 } // Adjust these numbers based on your system's capabilities
+
+//@ts-expect-error Promise<boolean | void>; }' is not assignable to parameter of type 'Factory<unknown>'.
 const scanPortPool = genericPool.createPool(scanPortFactory, opts)
 
 async function scanPorts(portsToScan: number[]) {
