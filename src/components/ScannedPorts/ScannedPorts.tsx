@@ -107,8 +107,6 @@ const ScannedPorts = () => {
         }
     }
 
-    console.log('state', state.data)
-
     // ensure row is deselected on every scan
     useEffect(() => {
         setRowSelection({})
@@ -198,7 +196,6 @@ const ScannedPorts = () => {
 
     useEffect(() => {
         setSelectedPort(table.getSelectedRowModel().rows?.[0]?.original || null)
-        console.log('test')
     }, [table, rowSelection, setSelectedPort])
 
     if (state.isLoading)
@@ -464,7 +461,7 @@ const ScannedPorts = () => {
                                         key={row.id}
                                         className={
                                             row.getIsSelected()
-                                                ? 'bg-[#521687]'
+                                                ? 'bg-americanViolet'
                                                 : 'odd:bg-charcoal even:bg-yankeesBlue'
                                         }
                                         onClick={() => {
@@ -484,9 +481,6 @@ const ScannedPorts = () => {
                                                 <td
                                                     key={cell.id}
                                                     className={`[&:not(:first-of-type):not(:nth-of-type(2)]:w-[10rem] max-w-[14rem] truncate pr-5 [&:empty::after]:text-[#9DA3AE] [&:empty::after]:content-['-'] [&:nth-of-type(2)]:w-[8rem] [&:nth-of-type(2)]:max-w-[8rem] [&:nth-of-type(2)]:py-4 `}
-                                                    onClick={() =>
-                                                        console.log(row)
-                                                    }
                                                 >
                                                     {flexRender(
                                                         cell.column.columnDef
@@ -501,16 +495,11 @@ const ScannedPorts = () => {
                             })}
                     </tbody>
                 </table>
-                {/* <hr />
-                <div>{table.getRowModel().rows.length} Rows</div> */}
-                {/* <div>
-    <button onClick={() => rerender()}>Force Rerender</button>
-  </div>
-  <div>
-    <button onClick={() => refreshData()}>Refresh Data</button>
-  </div> */}
-                {/* <hr />
 
+                {/* <div>{table.getRowModel().rows.length} Rows</div>
+                <button onClick={() => rerender()}>Force Rerender</button>
+                <button onClick={() => refreshData()}>Refresh Data</button>
+                <hr />
                 <pre>{JSON.stringify(sorting, null, 2)}</pre> */}
             </div>
         </div>
@@ -551,27 +540,27 @@ function DebouncedInput({
     )
 }
 
-function IndeterminateCheckbox({
-    indeterminate,
-    className = '',
-    ...rest
-}: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>) {
-    const ref = useRef<HTMLInputElement>(null!)
+// function IndeterminateCheckbox({
+//     indeterminate,
+//     className = '',
+//     ...rest
+// }: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>) {
+//     const ref = useRef<HTMLInputElement>(null!)
 
-    useEffect(() => {
-        if (typeof indeterminate === 'boolean') {
-            ref.current.indeterminate = !rest.checked && indeterminate
-        }
-    }, [ref, indeterminate])
+//     useEffect(() => {
+//         if (typeof indeterminate === 'boolean') {
+//             ref.current.indeterminate = !rest.checked && indeterminate
+//         }
+//     }, [ref, indeterminate])
 
-    return (
-        <input
-            type="checkbox"
-            ref={ref}
-            className={className + ' cursor-pointer'}
-            {...rest}
-        />
-    )
-}
+//     return (
+//         <input
+//             type="checkbox"
+//             ref={ref}
+//             className={className + ' cursor-pointer'}
+//             {...rest}
+//         />
+//     )
+// }
 
 export default ScannedPorts
