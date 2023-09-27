@@ -1,11 +1,13 @@
-import { app, BrowserWindow, ipcMain, net, shell } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, net, shell } from 'electron'
 import path from 'path'
 import os from 'os'
 import express from 'express'
 import { Server, IncomingMessage, ServerResponse } from 'http'
-import range from 'lodash.range'
 import kill from 'kill-port'
 import genericPool from 'generic-pool'
+
+// Constants
+import { DISCLAIMER } from './constants/disclaimer'
 
 // Utilities
 import { parseError } from './utils'
@@ -23,8 +25,8 @@ let mainWindow: BrowserWindow
 const createWindow = () => {
     // Create the browser window.
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1024,
+        height: 800,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
         },
@@ -54,6 +56,25 @@ const createWindow = () => {
         handleUrl(url)
         return { action: 'deny' }
     })
+
+    // if there is no required value in localstorage display the message box
+    ipcMain.on('get-localstorage-reminderShown', (event, value) => {
+        if (value !== 'true') {
+            showMessageBox()
+        }
+    })
+}
+
+async function showMessageBox() {
+    const dialogInstance = await dialog.showMessageBox(mainWindow, {
+        title: 'Reminder',
+        message: DISCLAIMER,
+        buttons: ['I UNDERSTAND'],
+    })
+
+    if (dialogInstance.response === 0) {
+        mainWindow?.webContents.send('set-localstorage-reminderShown', true)
+    }
 }
 
 // This method will be called when Electron has finished
@@ -379,7 +400,8 @@ async function killPort(port: number) {
             )
         }
 
-        return await kill(port)
+        await kill(port)
+        return await scanPorts([port])
 
         // eslint-disable-next-line no-useless-catch
     } catch (error) {
