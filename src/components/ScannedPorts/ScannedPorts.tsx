@@ -107,10 +107,12 @@ const ScannedPorts = () => {
         }
     }
 
-    console.log({ rowSelection })
-    console.log({ clickedRowInfo })
-
     console.log('state', state.data)
+
+    // ensure row is deselected on every scan
+    useEffect(() => {
+        setRowSelection({})
+    }, [state.isLoading])
 
     const columns = useMemo(
         () => [
