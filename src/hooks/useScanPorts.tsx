@@ -1,7 +1,7 @@
 import { useEffect, useReducer } from 'react'
 
 // Types
-import { ScannedPortsState } from '@/types/types'
+import { ScanPortResponse, ScannedPortsState } from '@/types/types'
 
 const reducer = (
     currentState: ScannedPortsState,
@@ -37,7 +37,7 @@ const useScanPorts = () => {
             const response =
                 await window.electronAPI.scanPorts(portsForScanning)
             dispatch({
-                data: response,
+                data: response as unknown as ScanPortResponse[],
             })
         } catch (error: unknown) {
             dispatch({
