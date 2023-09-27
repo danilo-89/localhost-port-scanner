@@ -12,8 +12,7 @@ import { DISCLAIMER } from './constants/disclaimer'
 // Utilities
 import { parseError } from './utils'
 
-// Types
-import { ScanPortResponse } from './types/types'
+const isDev = process.env.NODE_ENV === 'development'
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -29,6 +28,7 @@ const createWindow = () => {
         height: 800,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
+            devTools: isDev,
         },
     })
 
@@ -308,9 +308,9 @@ const scanPortFactory = {
             resolve(scanPort)
         })
     },
-    destroy: function (scanPort: any) {
+    destroy: function (scanPort: () => Promise<unknown>): Promise<void> {
         return new Promise((resolve) => {
-            resolve(false)
+            resolve()
         })
     },
 }
@@ -318,7 +318,7 @@ const scanPortFactory = {
 const opts = { max: 5 } // Adjust these numbers based on your system's capabilities
 const scanPortPool = genericPool.createPool(scanPortFactory, opts)
 
-async function scanPorts(portsToScan) {
+async function scanPorts(portsToScan: number[]) {
     const openPorts = []
     const totalPorts = portsToScan.length
 
@@ -359,8 +359,14 @@ async function scanPorts(portsToScan) {
             continue
         }
 
-        const response = await scanPortInstance(port)
-        scanPortPool.release(scanPortInstance)
+        let response
+
+        if (typeof scanPortInstance === 'function') {
+            response = await scanPortInstance(port)
+            scanPortPool.release(scanPortInstance)
+        } else {
+            console.log('scanPortInstance is not a function:', scanPortInstance)
+        }
 
         if (response) {
             openPorts.push({
