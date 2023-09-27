@@ -213,8 +213,9 @@ const ScannedPorts = () => {
                         height={'auto'}
                     />
                     <figcaption className="speech-bubble absolute right-[6.2rem] top-[-1rem] translate-x-full rounded-lg px-6 py-3 font-semibold text-manatee">
-                        Scanning, please wait
-                        <LoaderDots />
+                        Stand by for some detective work.
+                        <br />
+                        Scanning ports in progress <LoaderDots />
                     </figcaption>
                 </figure>
             </div>
