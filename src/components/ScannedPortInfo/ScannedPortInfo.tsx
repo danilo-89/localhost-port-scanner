@@ -76,7 +76,6 @@ const ScannedPortInfo = ({ clickedRowInfo }: IProps) => {
                                         {parsedContent}
                                     </pre>
                                 )}
-                                ∂
                                 {item.key === 'statusMessage' && (
                                     <div className="mt-2 block rounded-md bg-darkGunmetal/10 p-4 text-sm outline outline-charcoal">
                                         {getStatusMessageInfo(
