@@ -26,7 +26,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
             event: IpcRendererEvent,
             newState: number
         ) => {
-            console.log({ receivedState: newState })
             setState({ percentOfScanning: newState })
         }
 
