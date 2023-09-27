@@ -1,7 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
-    Arial, sans-serif;
-  margin: auto;
-  max-width: 38rem;
-  padding: 2rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        Helvetica, Arial, sans-serif;
+    margin: auto;
+    /* max-width: 38rem; */
+    padding: 2rem;
+}
+
+@layer base {
+    input,
+    select {
+        @apply rounded-md border border-darkGunmetal bg-charcoal placeholder-[#9DA3AE];
+    }
+}
+
+@layer components {
+    .styled-scrollbar {
+        /* Foreground, Background */
+        scrollbar-color: #3c588e #343638;
+        &::-webkit-scrollbar {
+            width: 14px; /* Mostly for vertical scrollbars */
+            height: 14px; /* Mostly for horizontal scrollbars */
+        }
+        &::-webkit-scrollbar-thumb {
+            /* Foreground */
+            background: #3c588e;
+            border-radius: 99999px;
+            border: 2px solid #343638;
+        }
+        &::-webkit-scrollbar-track {
+            /* Background */
+            background: #343638;
+        }
+        &::-webkit-scrollbar-corner {
+            background: #343638;
+            /* Corner when there are both axes scrollbars */
+        }
+    }
+
+    .speech-bubble {
+        border: 4px solid #79c967;
+        white-space: nowrap;
+
+        &:before {
+            content: '';
+            width: 0px;
+            height: 0px;
+            position: absolute;
+            border-left: 10px solid #79c967;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #79c967;
+            border-bottom: 10px solid transparent;
+            left: 8%;
+            bottom: -4px;
+            transform: translateY(100%);
+        }
+
+        &:after {
+            content: '';
+            width: 0px;
+            height: 0px;
+            position: absolute;
+            border-left: 10px solid #1d2029;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #1d2029;
+            border-bottom: 10px solid transparent;
+            left: calc(8% + 4px);
+            bottom: 4px;
+            transform: translateY(100%);
+        }
+    }
 }
