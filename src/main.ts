@@ -4,13 +4,15 @@ import os from 'os'
 import express from 'express'
 import { Server, IncomingMessage, ServerResponse } from 'http'
 import kill from 'kill-port'
-import genericPool from 'generic-pool'
 
 // Constants
 import { DISCLAIMER } from './constants/disclaimer'
 
 // Utilities
 import { parseError } from './utils'
+
+// Types
+import { ScanPortResponse } from './types/types'
 
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -216,112 +218,6 @@ function scanPort(port: number) {
 let portsAreScanning = false
 let shouldContinueScanning = true
 
-// async function scanPorts(portsToScan: number[]) {
-//     const openPorts = []
-//     const totalPorts = portsToScan.length
-//     // const totalPorts = endPort - startPort + 1;
-
-//     // console.log(totalPorts);
-//     // return;
-
-//     if (portsAreScanning) {
-//         console.log('Ports are already scanning!')
-//         throw new Error('Ports are already scanning!')
-//     }
-
-//     portsAreScanning = true
-//     shouldContinueScanning = true
-
-//     // [3000, 3001].forEach((port) => {
-//     // 	const response = await scanPort(port);
-//     // 	if (response) {
-//     // 		openPorts.push({
-//     // 			port,
-//     // 			statusCode: response?.statusCode,
-//     // 			statusMessage: response?.statusMessage,
-//     // 			headers: response?.headers,
-//     // 		});
-//     // 	}
-
-//     // 	// Calculate and call the progress callback
-//     // 	const percentComplete = ((port - startPort + 1) / totalPorts) * 100;
-//     // 	// console.log({ percentComplete });
-//     // 	mainWindow?.webContents.send('scan-ports-progress', percentComplete);
-//     // });
-//     // for (let port = startPort; port <= endPort; port++) {
-//     // 	const response = await scanPort(port);
-//     // 	if (response) {
-//     // 		openPorts.push({
-//     // 			port,
-//     // 			statusCode: response?.statusCode,
-//     // 			statusMessage: response?.statusMessage,
-//     // 			headers: response?.headers,
-//     // 		});
-//     // 	}
-
-//     // 	// Calculate
-//     // 	const percentComplete = ((port - startPort + 1) / totalPorts) * 100;
-//     // 	// console.log({ percentComplete });
-//     // 	mainWindow?.webContents.send('scan-ports-progress', percentComplete);
-//     // }
-//     let index = 0
-
-//     for (const port of portsToScan) {
-//         index++
-
-//         // Check if the flag is set to false, and if so, stop scanning
-//         if (!shouldContinueScanning) {
-//             console.log('Scanning stopped.')
-//             break
-//         }
-
-//         const response = (await scanPort(port)) as false | ScanPortResponse
-//         if (response) {
-//             openPorts.push({
-//                 port,
-//                 statusCode: response?.statusCode,
-//                 statusMessage: response?.statusMessage,
-//                 headers: response?.headers,
-//                 error: response?.error,
-//             })
-//         }
-
-//         // Calculate and call the progress callback
-//         const percentComplete = (index / totalPorts) * 100
-//         console.log({ index }, { totalPorts })
-//         mainWindow?.webContents.send('scan-ports-progress', percentComplete)
-//     }
-
-//     console.log({ portsToScan })
-//     console.log({ openPorts })
-//     portsAreScanning = false
-//     return openPorts
-// }
-
-// scanPorts(8000, 9000).then((openPorts) => {
-// 	console.log('Open ports:', openPorts);
-// });
-
-const scanPortFactory = {
-    create: function () {
-        return new Promise((resolve, reject) => {
-            resolve(scanPort)
-        })
-    },
-    destroy: function (
-        scanPort: () => Promise<unknown>
-    ): Promise<void | boolean> {
-        return new Promise((resolve) => {
-            resolve(false)
-        })
-    },
-}
-
-const opts = { max: 5 } // Adjust these numbers based on your system's capabilities
-
-//@ts-expect-error Promise<boolean | void>; }' is not assignable to parameter of type 'Factory<unknown>'.
-const scanPortPool = genericPool.createPool(scanPortFactory, opts)
-
 async function scanPorts(portsToScan: number[]) {
     const openPorts = []
     const totalPorts = portsToScan.length
@@ -335,43 +231,17 @@ async function scanPorts(portsToScan: number[]) {
     shouldContinueScanning = true
 
     let index = 0
+
     for (const port of portsToScan) {
         index++
+
+        // Check if the flag is set to false, and if so, stop scanning
         if (!shouldContinueScanning) {
             console.log('Scanning stopped.')
             break
         }
 
-        let scanPortInstance
-        let retries = 0
-        const maxRetries = 5 // Adjust this based on your needs
-
-        while (!scanPortInstance && retries < maxRetries) {
-            try {
-                scanPortInstance = await scanPortPool.acquire()
-            } catch (error) {
-                console.log('All workers are busy. Retrying in 1 second...')
-                await new Promise((resolve) => setTimeout(resolve, 1000)) // Wait for 1 second
-                retries++
-            }
-        }
-
-        if (!scanPortInstance) {
-            console.log(
-                `Failed to acquire a worker after ${maxRetries} retries. Skipping port ${port}.`
-            )
-            continue
-        }
-
-        let response
-
-        if (typeof scanPortInstance === 'function') {
-            response = await scanPortInstance(port)
-            scanPortPool.release(scanPortInstance)
-        } else {
-            console.log('scanPortInstance is not a function:', scanPortInstance)
-        }
-
+        const response = (await scanPort(port)) as false | ScanPortResponse
         if (response) {
             openPorts.push({
                 port,
@@ -382,6 +252,7 @@ async function scanPorts(portsToScan: number[]) {
             })
         }
 
+        // Calculate and call the progress callback
         const percentComplete = (index / totalPorts) * 100
         console.log({ index }, { totalPorts })
         mainWindow?.webContents.send('scan-ports-progress', percentComplete)
