@@ -2,29 +2,55 @@ import { usePortsForScanningContext } from '@/context/PortsForScanningContext'
 import { useScannedPortsContext } from '@/context/ScannedPortsContext'
 import Button from '../common/Button'
 import { useSelectedPortContext } from '@/context/SelectedPortContext'
+import { ScanPortResponse } from '@/types/types'
+import { useState } from 'react'
+import Modal from '../common/Modal'
 
 const Controls = () => {
-    const { state, dispatch, portsForScanning } = usePortsForScanningContext()
-    const { state: scanningResult, scanPorts } = useScannedPortsContext()
+    const { portsForScanning } = usePortsForScanningContext()
+    const {
+        state: scanningResult,
+        scanPorts,
+        dispatch,
+    } = useScannedPortsContext()
     const {
         selectedPort,
+        setSelectedPort,
         setKillPortResult,
         killPortResult,
         isPortKilling,
         setIsPortKilling,
     } = useSelectedPortContext()
 
+    const [showConfirmModal, setShowConfirmModal] = useState(false)
+
     console.log({ selectedPort })
     console.log({ killPortResult })
 
     const killPortHandler = async () => {
+        setShowConfirmModal(false)
         setIsPortKilling(true)
         setKillPortResult(null)
         try {
-            await window.electronAPI.killPort(selectedPort?.port)
+            const response = await window.electronAPI.killPort(
+                selectedPort?.port
+            )
             setKillPortResult({
                 port: selectedPort?.port,
                 success: true,
+            })
+
+            // replace data for the successfully killed port
+            dispatch({
+                data: scanningResult.data.map(
+                    (item: Partial<ScanPortResponse>) => {
+                        if (item.port === response?.[0]?.port) {
+                            console.log('in map', response[0])
+                            return response[0]
+                        }
+                        return item
+                    }
+                ),
             })
         } catch (error) {
             setKillPortResult({
@@ -52,6 +78,7 @@ const Controls = () => {
                         isPortKilling
                     }
                     onClick={() => {
+                        setSelectedPort(null)
                         setKillPortResult(null)
                         scanPorts(portsForScanning)
                     }}
@@ -78,11 +105,39 @@ const Controls = () => {
                         isPortKilling ||
                         scanningResult.isLoading
                     }
-                    onClick={() => killPortHandler()}
+                    onClick={() => setShowConfirmModal(true)}
                 >
                     KILL
                 </Button>
             </div>
+
+            {showConfirmModal && selectedPort ? (
+                <Modal setIsOpen={setShowConfirmModal}>
+                    <div className="w-[30rem] bg-yankeesBlue">
+                        <div className="mb-4 bg-darkGunmetal p-4">
+                            <h2 className="text-lg font-bold">
+                                Confirm action
+                            </h2>
+                        </div>{' '}
+                        <div className="p-5 text-center">
+                            <div className="mb-8 text-lg">
+                                Try to kill process that is
+                                <br /> running on the port{' '}
+                                <span className="rounded-md bg-charcoal px-2 font-bold">
+                                    {selectedPort.port}
+                                </span>{' '}
+                                ?
+                            </div>
+                            <Button
+                                variation="neutral"
+                                onClick={killPortHandler}
+                            >
+                                Confirm
+                            </Button>
+                        </div>
+                    </div>
+                </Modal>
+            ) : null}
         </>
     )
 }
