@@ -16,14 +16,7 @@ const storedPortsForScanningSchema = z.array(
     ])
 )
 
-const defaultPortsForScanning = [
-    [1, 10],
-    2001,
-    999999999,
-    [3_000, 11_000],
-    // [50_000, 65_535],
-    // [1000, 3000],
-]
+const defaultPortsForScanning = [[1, 10], 2001, [3_000, 11_000]]
 
 export const getInitialPortsForScanning = () => {
     const dataFromStorage = getStorageItem('portsForScanning')
