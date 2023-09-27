@@ -112,6 +112,7 @@ const Settings = () => {
             dispatch({ name: 'add', payload: inputSingle })
         }
     }
+
     return (
         <div className="w-[30rem] bg-yankeesBlue">
             <div className="mb-4 bg-darkGunmetal p-4">

@@ -2,14 +2,16 @@
 import { useScannedPortsContext } from '@/context/ScannedPortsContext'
 import { useSelectedPortContext } from '@/context/SelectedPortContext'
 
-const scanFinished = <span className="text-[#77D48D]">Scanning finished!</span>
+const scanFinished = (
+    <span className="text-pastelGreen">Scanning finished!</span>
+)
 const scanStopped = (
-    <span className="text-[#d193d2] [&+span]:text-[#d193d2]">
+    <span className="text-grayishMagenta [&+span]:text-grayishMagenta">
         Scanning stopped at
     </span>
 )
 const scanInProgress = (
-    <span className="text-[#d0ed90] [&+span]:text-[#d0ed90]">
+    <span className="text-crayola [&+span]:text-crayola">
         Scanning in progress:
     </span>
 )
@@ -39,7 +41,7 @@ const InfoStatus = () => {
     if (isPortKilling)
         return (
             <>
-                <span className="text-[#90ceed]">
+                <span className="text-cornflower">
                     Killing port in progress...
                 </span>
             </>
@@ -49,11 +51,11 @@ const InfoStatus = () => {
         return (
             <>
                 {killPortResult.success ? (
-                    <span className="text-[#d193d2]">
+                    <span className="text-grayishMagenta">
                         Port {killPortResult.port} killed successfully.
                     </span>
                 ) : (
-                    <span className="text-[#fa6a6a]">
+                    <span className="text-pastelRed">
                         {killPortResult.errorMessage}
                     </span>
                 )}

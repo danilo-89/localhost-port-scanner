@@ -70,7 +70,7 @@ const Input = forwardRef(
                     onFocus={onFocus}
                 />
                 {showError ? (
-                    <span className="absolute -bottom-1 left-1 block translate-y-full text-sm text-[red]">
+                    <span className="text-pastelRed absolute -bottom-1 left-1 block translate-y-full text-sm">
                         {errorText ?? <>&nbsp;</>}
                     </span>
                 ) : null}

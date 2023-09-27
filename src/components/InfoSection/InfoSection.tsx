@@ -1,17 +1,22 @@
 import { useState } from 'react'
-import Modal from '../common/Modal'
-import { usePortsForScanningContext } from '@/context/PortsForScanningContext'
-import Settings from '../Settings'
-import { useScannedPortsContext } from '@/context/ScannedPortsContext'
-import SvgCog8Solid from '../icons/SvgCog8Solid'
-import Button from '../common/Button'
 import clsx from 'clsx'
+
+// Contexts
+import { usePortsForScanningContext } from '@/context/PortsForScanningContext'
+import { useScannedPortsContext } from '@/context/ScannedPortsContext'
+
+// Components
+import Modal from '@/components/common/Modal'
+import Settings from '@/components/Settings'
+import SvgCog8Solid from '@/components/icons/SvgCog8Solid'
+import Button from '@/components/common/Button'
 import InfoStatus from './InfoStatus'
 
 const InfoSection = () => {
     const { portsForScanning } = usePortsForScanningContext()
-    const [showSettings, setShowSettings] = useState(false)
     const { state: scanningResult } = useScannedPortsContext()
+
+    const [showSettings, setShowSettings] = useState(false)
 
     const isValidPercent = typeof scanningResult.percentOfScanning === 'number'
 

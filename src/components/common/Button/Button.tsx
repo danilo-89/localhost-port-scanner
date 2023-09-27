@@ -25,10 +25,10 @@ const Button = ({
         hasBorder && 'shadow-inner-discreet',
         size === 'sm' ? 'py-0 px-2' : 'py-2.5 px-7',
         `text-${size}`,
-        variation === 'primary' && 'bg-[#49A078]',
-        variation === 'secondary' && 'bg-[#9052F2]',
-        variation === 'tertiary' && 'bg-[#3C588E]',
-        variation === 'neutral' && 'bg-[#656c7a]',
+        variation === 'primary' && 'bg-shinyShamrock',
+        variation === 'secondary' && 'bg-lavenderIndigo',
+        variation === 'tertiary' && 'bg-chineseBlue',
+        variation === 'neutral' && 'bg-nickel',
         variation === 'transparent' && 'bg-[transparent]',
         // additional
         className

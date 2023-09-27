@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
+
+// Components
 import { SvgArrowPath } from '@/components/icons'
-import Button from '../common/Button'
+import Button from '@/components/common/Button'
 
 const Footer = () => {
     const [ipAddress, setIpAddress] = useState(undefined)
-
-    console.log(ipAddress)
 
     const provideGetIP = useCallback(async () => {
         try {
@@ -20,7 +20,7 @@ const Footer = () => {
     }, [provideGetIP])
 
     return (
-        <footer className="fixed bottom-0 left-0 right-0 flex justify-between bg-[#2a2e3b] px-3 py-1 text-sm text-[#939aaf]">
+        <footer className="bg-gunmetal text-santasGray fixed bottom-0 left-0 right-0 flex justify-between px-3 py-1 text-sm">
             <div>{ipAddress}</div>
             <Button
                 variation="transparent"

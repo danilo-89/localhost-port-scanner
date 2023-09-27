@@ -37,7 +37,6 @@ const reducer = (
             typeof action.payload === 'number' &&
             state.includes(action.payload)
         ) {
-            console.log('port already added')
             return state
         }
         return [...state, action.payload]

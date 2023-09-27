@@ -15,12 +15,10 @@ const storedPortsForScanningSchema = z.array(
 )
 
 const defaultPortsForScanning = [
-    1,
+    [1, 10],
+    2001,
     [3_000, 11_000],
     // [50_000, 65_535],
-    // 9999999999999,
-    7000,
-    3001,
     // [1000, 3000],
 ]
 

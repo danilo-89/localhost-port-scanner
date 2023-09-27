@@ -21,12 +21,12 @@ const useScanPorts = () => {
     useEffect(() => {
         // Init state listening and get the cleanup function
         const cleanup = window.electronAPI.initPercent(dispatch)
-        console.log('inside listener uef')
+
         // Call the cleanup function on component unmount
         return cleanup
     }, [])
 
-    const scanPorts = async (portsForScaning: (number | number[])[]) => {
+    const scanPorts = async (portsForScanning: (number | number[])[]) => {
         dispatch({
             data: null,
             isLoading: true,
@@ -34,13 +34,12 @@ const useScanPorts = () => {
             percentOfScanning: 0,
         })
         try {
-            const response = await window.electronAPI.scanPorts(portsForScaning)
-            console.log(response)
+            const response =
+                await window.electronAPI.scanPorts(portsForScanning)
             dispatch({
                 data: response,
             })
         } catch (error: unknown) {
-            console.log(error)
             dispatch({
                 error: error,
             })

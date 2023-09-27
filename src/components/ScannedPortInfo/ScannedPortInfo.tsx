@@ -10,9 +10,12 @@ import { scannedPortInfoConfig } from './scannedPortInfoConfig'
 import { getStatusMessageInfo } from '@/utils/getStatusMessageInfo'
 import { getPortRangeMessage } from '@/utils/getPortRangeMessage'
 
+// Types
+import { ScanPortResponse } from '@/types/types'
+
 // TS
 interface IProps {
-    clickedRowInfo: any
+    clickedRowInfo: ScanPortResponse
 }
 
 const ScannedPortInfo = ({ clickedRowInfo }: IProps) => {
@@ -31,7 +34,7 @@ const ScannedPortInfo = ({ clickedRowInfo }: IProps) => {
                         href={PORT_RANGE_MESSAGES_SOURCE}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-1 text-sm text-[#619ad6] underline"
+                        className="text-blueGray mt-1 text-sm underline"
                     >
                         list of TCP and UDP port numbers
                     </a>{' '}
@@ -40,10 +43,12 @@ const ScannedPortInfo = ({ clickedRowInfo }: IProps) => {
                 <div></div>
             </div>
             <div className="p-5">
-                {/* <span className="mb-8 block border-b border-b-charcoal pt-2" /> */}
                 <ul className="flex flex-col">
                     {scannedPortInfoConfig.map((item) => {
-                        const itemValue = clickedRowInfo[item.key]
+                        const itemValue =
+                            clickedRowInfo[
+                                item.key as keyof typeof clickedRowInfo
+                            ]
                         const parsedContent = JSON.stringify(itemValue, null, 4)
 
                         if (itemValue === undefined) return null
@@ -71,12 +76,14 @@ const ScannedPortInfo = ({ clickedRowInfo }: IProps) => {
                                         {parsedContent}
                                     </pre>
                                 )}
-
+                                ∂
                                 {item.key === 'statusMessage' && (
                                     <div className="mt-2 block rounded-md bg-darkGunmetal/10 p-4 text-sm outline outline-charcoal">
-                                        {getStatusMessageInfo(itemValue)}
+                                        {getStatusMessageInfo(
+                                            itemValue as string
+                                        )}
                                         {itemValue !== 'OK' && (
-                                            <div className="mt-3 text-[#619ad6]">
+                                            <div className="text-blueGray mt-3">
                                                 <a
                                                     href="https://source.chromium.org/chromium/chromium/src/+/main:net/base/net_error_list.h"
                                                     target="_blank"

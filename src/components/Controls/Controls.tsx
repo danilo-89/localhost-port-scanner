@@ -1,10 +1,16 @@
+import { useState } from 'react'
+
+// Contexts
 import { usePortsForScanningContext } from '@/context/PortsForScanningContext'
 import { useScannedPortsContext } from '@/context/ScannedPortsContext'
-import Button from '../common/Button'
 import { useSelectedPortContext } from '@/context/SelectedPortContext'
+
+// Components
+import Button from '@/components/common/Button'
+import Modal from '@/components/common/Modal'
+
+// Types
 import { ScanPortResponse } from '@/types/types'
-import { useState } from 'react'
-import Modal from '../common/Modal'
 
 const Controls = () => {
     const { portsForScanning } = usePortsForScanningContext()
@@ -17,15 +23,11 @@ const Controls = () => {
         selectedPort,
         setSelectedPort,
         setKillPortResult,
-        killPortResult,
         isPortKilling,
         setIsPortKilling,
     } = useSelectedPortContext()
 
     const [showConfirmModal, setShowConfirmModal] = useState(false)
-
-    console.log({ selectedPort })
-    console.log({ killPortResult })
 
     const killPortHandler = async () => {
         setShowConfirmModal(false)

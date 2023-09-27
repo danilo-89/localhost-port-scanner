@@ -1,15 +1,15 @@
 import { createContext, ReactNode, useContext, useState } from 'react'
 
 // Types
-import { ScanPortResponse } from '@/types/types'
+import { KillPortResult, ScanPortResponse } from '@/types/types'
 
 // TS
 interface ISelectedPortContext {
     selectedPort: Partial<ScanPortResponse> | null
-    killPortResult: any
+    killPortResult: null | KillPortResult
     setSelectedPort: (arg1: Partial<ScanPortResponse> | null) => void
-    setIsPortKilling: any
-    setKillPortResult: any
+    setIsPortKilling: (arg1: boolean) => void
+    setKillPortResult: (arg1: KillPortResult | null) => void
     isPortKilling: boolean
 }
 
