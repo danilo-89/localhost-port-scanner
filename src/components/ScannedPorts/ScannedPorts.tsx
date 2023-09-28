@@ -159,7 +159,7 @@ const ScannedPorts = () => {
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-        debugTable: true,
+        debugTable: false,
     })
 
     useEffect(() => {
