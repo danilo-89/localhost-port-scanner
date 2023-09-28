@@ -1,6 +1,4 @@
 export interface IElectronAPI {
-    startServer: () => void
-    stopServer: () => void
     scanPort: () => void
     stopScanning: () => void
     scanPorts: (arg1: (number | number[])[]) => Promise<void>
