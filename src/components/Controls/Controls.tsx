@@ -37,6 +37,7 @@ const Controls = () => {
             const response = await window.electronAPI.killPort(
                 selectedPort?.port
             )
+
             setKillPortResult({
                 port: selectedPort?.port,
                 success: true,
@@ -46,8 +47,7 @@ const Controls = () => {
             dispatch({
                 data: scanningResult.data.map(
                     (item: Partial<ScanPortResponse>) => {
-                        if (item.port === response?.[0]?.port) {
-                            console.log('in map', response[0])
+                        if (response && item.port === response?.[0]?.port) {
                             return response[0]
                         }
                         return item

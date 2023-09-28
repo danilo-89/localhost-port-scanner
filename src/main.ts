@@ -1,8 +1,6 @@
 import { app, BrowserWindow, dialog, ipcMain, net, shell } from 'electron'
 import path from 'path'
 import os from 'os'
-import express from 'express'
-import { Server, IncomingMessage, ServerResponse } from 'http'
 import kill from 'kill-port'
 
 // Constants
@@ -137,24 +135,6 @@ function maybeParseUrl(value: string): URL | undefined {
 
     return undefined
 }
-
-let server: Server<typeof IncomingMessage, typeof ServerResponse>
-
-ipcMain.handle('start-server', () => {
-    console.log('inside start-server')
-    if (!server) {
-        const app = express()
-        app.get('/', (req, res) => {
-            res.send('Hello World!')
-        })
-
-        server = app.listen(3001, () => {
-            console.log(`Server running at http://localhost:3001/`)
-        })
-    }
-
-    return 'Server started'
-})
 
 // SCAN PORT functionality
 function scanPort(port: number) {
@@ -318,17 +298,6 @@ ipcMain.handle('kill-port', (event, port: number) => {
 
 ipcMain.handle('scan-ports-progress', (event, percentComplete) => {
     return percentComplete
-})
-
-ipcMain.handle('stop-server', () => {
-    if (server) {
-        server.close(() => {
-            console.log('Server stopped')
-        })
-        server = null
-    }
-
-    return 'Server stopped'
 })
 
 ipcMain.handle('scan-port', async () => {

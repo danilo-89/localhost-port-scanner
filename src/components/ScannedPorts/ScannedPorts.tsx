@@ -1,36 +1,36 @@
-import { HTMLProps, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
-    ColumnDef,
     FilterFn,
     createColumnHelper,
     flexRender,
     getCoreRowModel,
     getFilteredRowModel,
     getSortedRowModel,
-    PaginationState,
-    isRowSelected,
     useReactTable,
     getPaginationRowModel,
+    SortingState,
 } from '@tanstack/react-table'
-import {
-    RankingInfo,
-    rankItem,
-    compareItems,
-} from '@tanstack/match-sorter-utils'
-import { usePortsForScanningContext } from '@/context/PortsForScanningContext'
-import { useScannedPortsContext } from '@/context/ScannedPortsContext'
-// import * as Checkbox from '@radix-ui/react-checkbox';
+import { rankItem } from '@tanstack/match-sorter-utils'
+
+// Assets
 import detectiveImg from '@/assets/detective.png'
 import detectiveReadyImg from '@/assets/detective-ready.png'
-import LoaderDots from '../LoaderDots'
-import Button from '../common/Button'
-import SvgInfoCircle from '../icons/SvgInfoCircle'
-import Modal from '../common/Modal'
-import ScannedPortInfo from '../ScannedPortInfo'
+
+// Contexts
+import { usePortsForScanningContext } from '@/context/PortsForScanningContext'
+import { useScannedPortsContext } from '@/context/ScannedPortsContext'
 import { useSelectedPortContext } from '@/context/SelectedPortContext'
-import SvgChevronDoubleLeft from '../icons/SvgChevronDoubleLeft'
-import SvgChevronLeft from '../icons/SvgChevronLeft'
-import { SvgCog8Solid } from '../icons'
+
+// Components
+import LoaderDots from '@/components/LoaderDots'
+import Button from '@/components/common/Button'
+import SvgInfoCircle from '@/components/icons/SvgInfoCircle'
+import Modal from '@/components/common/Modal'
+import ScannedPortInfo from '@/components/ScannedPortInfo'
+import SvgChevronDoubleLeft from '@/components/icons/SvgChevronDoubleLeft'
+import SvgChevronLeft from '@/components/icons/SvgChevronLeft'
+import { SvgCog8Solid } from '@/components/icons'
+import DebouncedInput from './DebouncedInput'
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
     // Rank the item
@@ -47,37 +47,6 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 
 const emptyArray: [] = []
 
-const dataMockup = [
-    {
-        port: 3000,
-        statusCode: 200,
-        statusMessage: 'OK',
-        headers: {
-            'cache-control': 'no-store, must-revalidate',
-            connection: 'keep-alive',
-            'content-encoding': 'gzip',
-            'content-type': 'text/html; charset=utf-8',
-            date: 'Sun, 17 Sep 2023 19:25:28 GMT',
-            'keep-alive': 'timeout=5',
-            'transfer-encoding': 'chunked',
-            vary: 'RSC, Next-Router-State-Tree, Next-Router-Prefetch, Next-Url, Accept-Encoding',
-            'x-powered-by': 'Next.js',
-        },
-    },
-    {
-        port: 5173,
-        statusCode: 404,
-        statusMessage: 'Not Found',
-        headers: {
-            'access-control-allow-origin': '*',
-            connection: 'keep-alive',
-            'content-length': '0',
-            date: 'Sun, 17 Sep 2023 19:25:29 GMT',
-            'keep-alive': 'timeout=5',
-        },
-    },
-]
-
 type Port = {
     port: number
     statusMessage: string
@@ -93,11 +62,12 @@ const columnHelper = createColumnHelper<Port>()
 const ScannedPorts = () => {
     const { state } = useScannedPortsContext()
     const { portsForScanning } = usePortsForScanningContext()
-    const [sorting, setSorting] = useState<any>([])
+    const { setSelectedPort } = useSelectedPortContext()
+
+    const [sorting, setSorting] = useState<SortingState>([])
     const [globalFilter, setGlobalFilter] = useState('')
     const [rowSelection, setRowSelection] = useState({})
     const [clickedRowInfo, setClickedRowInfo] = useState(null)
-    const { setSelectedPort } = useSelectedPortContext()
 
     const setModalState = (openState: boolean) => {
         if (openState === false) {
@@ -166,9 +136,7 @@ const ScannedPorts = () => {
     )
 
     const table = useReactTable({
-        // initialState: [],
         data: state.data || emptyArray,
-        // data: state?.data || [],
         columns,
         state: {
             sorting,
@@ -191,7 +159,7 @@ const ScannedPorts = () => {
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-        debugTable: true,
+        debugTable: false,
     })
 
     useEffect(() => {
@@ -471,12 +439,7 @@ const ScannedPorts = () => {
                                                 row.toggleSelected()
                                             }
                                         }}
-                                        // onClick={() => setSelectedRow(row)}
-                                        // className='border-y-[1rem] border-[transparent]'
                                     >
-                                        {/* <td>
-											<input type='checkbox' name='' id='' />
-										</td> */}
                                         {row.getVisibleCells().map((cell) => {
                                             return (
                                                 <td
@@ -506,62 +469,5 @@ const ScannedPorts = () => {
         </div>
     )
 }
-
-// A debounced input react component
-function DebouncedInput({
-    value: initialValue,
-    onChange,
-    debounce = 500,
-    ...props
-}: {
-    value: string | number
-    onChange: (value: string | number) => void
-    debounce?: number
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>) {
-    const [value, setValue] = useState(initialValue)
-
-    useEffect(() => {
-        setValue(initialValue)
-    }, [initialValue])
-
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            onChange(value)
-        }, debounce)
-
-        return () => clearTimeout(timeout)
-    }, [value])
-
-    return (
-        <input
-            {...props}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-        />
-    )
-}
-
-// function IndeterminateCheckbox({
-//     indeterminate,
-//     className = '',
-//     ...rest
-// }: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>) {
-//     const ref = useRef<HTMLInputElement>(null!)
-
-//     useEffect(() => {
-//         if (typeof indeterminate === 'boolean') {
-//             ref.current.indeterminate = !rest.checked && indeterminate
-//         }
-//     }, [ref, indeterminate])
-
-//     return (
-//         <input
-//             type="checkbox"
-//             ref={ref}
-//             className={className + ' cursor-pointer'}
-//             {...rest}
-//         />
-//     )
-// }
 
 export default ScannedPorts
