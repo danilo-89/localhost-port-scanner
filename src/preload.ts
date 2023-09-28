@@ -7,12 +7,6 @@ import { IpcRendererEvent, contextBridge, ipcRenderer } from 'electron'
 import { getStorageItem, setStorageItem } from './utils'
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    startServer: () => {
-        ipcRenderer.invoke('start-server')
-    },
-    stopServer: () => {
-        ipcRenderer.invoke('stop-server')
-    },
     scanPort: () => {
         ipcRenderer.invoke('scan-port')
     },
