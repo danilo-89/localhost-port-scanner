@@ -21,7 +21,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
 
     initPercent: (setState: (arg1: { percentOfScanning: number }) => void) => {
-        console.log('inside initPercent')
         const stateUpdateHandler = (
             event: IpcRendererEvent,
             newState: number
@@ -33,7 +32,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
         // Return a cleanup function to remove the event listener
         return () => {
-            console.log('scan-ports-progress listener cleanup')
             ipcRenderer.removeListener(
                 'scan-ports-progress',
                 stateUpdateHandler
